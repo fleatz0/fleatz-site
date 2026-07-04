@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleatz — Motion Design / 3DCG</title>
+<meta name="description" content="Fleatz — After Effects と Blender による映像制作。二次創作MV、リリックモーション、3DCG。">
+<meta name="theme-color" content="#0B0B0C">
+<meta property="og:title" content="Fleatz — Motion Design / 3DCG">
+<meta property="og:description" content="After Effects と Blender による映像制作。二次創作MV、リリックモーション、3DCG。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<!-- 公開後に有効化: URLを実際の公開先に書き換えること
+<meta property="og:url" content="https://<ユーザー名>.github.io/fleatz-site/">
+<meta property="og:image" content="https://<ユーザー名>.github.io/fleatz-site/ogp.png">
+-->
+<!-- FONTS: Adobe Fonts(WebプロジェクトID: ucv5eqg)
+     和文フォントが動的サブセット配信のため <link> ではなく JS 埋め込みが必須。
+     フォントの追加・変更は fonts.adobe.com の Webプロジェクト側で行い、
+     :root の --disp / --body / --mono の名前を対応させる -->
+<link rel="preconnect" href="https://use.typekit.net" crossorigin>
+<script>
+  (function(d){
+    var config = { kitId: "ucv5eqg", scriptTimeout: 3000, async: true },
+    h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive"},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src="https://use.typekit.net/"+config.kitId+".js";tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+  })(document);
+</script>
+<style>
+  /* =====================================================
+     DESIGN TOKENS — デザインの手動調整はまずここをいじる
+     下の見た目CSSを触らなくても、ここだけでかなり変わる。
+     コメントの括弧内は破綻しにくい調整範囲の目安。
+     ===================================================== */
+  :root{
+    /* --- 色(モノクロ基調は維持。--signal は受付状態の点のみ) --- */
+    --ink:      #0B0B0C;   /* 背景 */
+    --ink-2:    #121214;   /* 面(サムネイル下地など) */
+    --paper:    #EDEDEB;   /* 主文字 */
+    --grey:     #8B8B90;   /* 補助文字 */
+    --line:     rgba(237,237,235,.16);  /* 罫線 */
+    --signal:   #C6F548;   /* 受付状態の点。ここ以外に使わない */
+
+    /* --- フォント(Adobe Fonts / キット ucv5eqg。変更はキット側と揃える) --- */
+    --disp: "obviously-narrow", sans-serif;         /* 大見出し FLEATZ / h2 */
+    --body: "dnp-shuei-gothic-gin-std", sans-serif; /* 本文(和文) */
+    --mono: "input-mono-condensed", monospace;      /* 目録・HUD表記 */
+    /* 予備: "din-2014" もキットに読込済み(未使用) */
+
+    /* --- 寸法・質感 --- */
+    --max: 1060px;        /* コンテンツ幅(960〜1200) */
+    --h1-max: 168px;      /* FLEATZ の最大サイズ(120〜200) */
+    --bracket: 22px;      /* ヒーロー四隅ブラケット(16〜32) */
+    --bracket-sm: 14px;   /* サムネイル四隅(10〜18) */
+    --grain: .045;        /* フィルムグレインの濃さ(0でオフ〜.08) */
+
+    /* --- 動き --- */
+    --ease: cubic-bezier(.22,1,.36,1);  /* 減速カーブ。全モーション共用 */
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--ink); color:var(--paper);
+    font-family:var(--body); font-size:15px; line-height:1.9;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; text-decoration:none; }
+  a:hover{ opacity:.75; }
+  :focus-visible{ outline:1px solid var(--paper); outline-offset:3px; }
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+  .mono{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--grey); }
+
+  /* ============ header ============ */
+  header{
+    position:sticky; top:0; z-index:10;
+    background:color-mix(in srgb, var(--ink) 88%, transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; justify-content:space-between; align-items:center;
+    height:52px;
+  }
+  .nav .brand{ font-family:var(--mono); font-size:12px; letter-spacing:.22em; }
+  .nav ul{ display:flex; gap:28px; list-style:none; }
+  .nav a{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--grey); }
+  .nav a:hover{ color:var(--paper); opacity:1; }
+
+  /* ============ hero(ファインダー枠) ============ */
+  .hero{ padding:96px 0 72px; position:relative; }
+  .frame{
+    position:relative; padding:64px 40px 48px;
+  }
+  /* 四隅のブラケット */
+  .frame::before,.frame::after,
+  .frame .b::before,.frame .b::after{
+    content:""; position:absolute; width:var(--bracket); height:var(--bracket);
+    border:1px solid var(--paper); opacity:.85;
+  }
+  .frame::before{ top:0; left:0;   border-right:0; border-bottom:0; }
+  .frame::after { top:0; right:0;  border-left:0;  border-bottom:0; }
+  .frame .b::before{ bottom:0; left:0;  border-right:0; border-top:0; }
+  .frame .b::after { bottom:0; right:0; border-left:0;  border-top:0; }
+  h1{
+    font-family:var(--disp); font-weight:600;
+    font-size:clamp(72px, 14vw, var(--h1-max));
+    line-height:.92; letter-spacing:.01em;
+    text-transform:uppercase;
+  }
+  .hero .sub{
+    margin-top:28px; display:flex; flex-wrap:wrap; gap:10px 32px;
+    align-items:baseline;
+  }
+  .hero .sub .role{ font-size:15px; color:var(--paper); }
+  .statusline{
+    margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:8px 28px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--grey);
+  }
+  .dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--signal); margin-right:8px; vertical-align:1px;
+  }
+  .dot.closed{ background:var(--grey); }
+
+  /* ============ sections ============ */
+  section{ padding:72px 0; border-top:1px solid var(--line); }
+  section, footer{ scroll-margin-top:64px; }  /* スティッキーヘッダーに見出しが隠れないように */
+  .sec-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:40px;
+  }
+  h2{
+    font-family:var(--disp); font-weight:400; text-transform:uppercase;
+    font-size:clamp(26px,4vw,38px); letter-spacing:.04em;
+  }
+
+  /* ============ works: 目録形式 ============ */
+  .work{
+    display:grid; grid-template-columns:minmax(0,420px) 1fr;
+    gap:28px; padding:28px 0; border-top:1px solid var(--line);
+    align-items:start;
+  }
+  .work:first-of-type{ border-top:0; padding-top:0; }
+  .player{
+    position:relative; aspect-ratio:16/9; background:var(--ink-2);
+    overflow:hidden;
+  }
+  .player img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(1) contrast(1.05);
+    transition:filter .35s ease;
+  }
+  .player button{
+    position:absolute; inset:0; width:100%; height:100%;
+    background:transparent; border:0; cursor:pointer;
+  }
+  .player button::after{
+    content:"▶ PLAY"; position:absolute; right:10px; bottom:8px;
+    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+    color:var(--paper); background:rgba(11,11,12,.72); padding:4px 8px;
+  }
+  .player:hover img{ filter:grayscale(0); }
+  .player iframe{ width:100%; height:100%; border:0; display:block; }
+  .player.empty{
+    display:flex; align-items:center; justify-content:center;
+    border:1px dashed var(--line);
+  }
+  .meta .idx{ font-family:var(--mono); font-size:11px; color:var(--grey); letter-spacing:.14em; }
+  .meta h3{
+    font-family:var(--body); font-weight:500; font-size:17px;
+    margin:8px 0 10px; line-height:1.6;
+  }
+  .meta dl{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--grey); }
+  .meta dl div{ display:flex; gap:16px; padding:3px 0; }
+  .meta dt{ width:56px; flex:none; opacity:.7; }
+  .meta .work-note{ margin-top:12px; font-size:13px; line-height:1.85; color:var(--grey); max-width:36em; }
+
+  /* ============ about / commission ============ */
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:56px; }
+  .about p{ color:var(--paper); max-width:34em; }
+  .about p + p{ margin-top:12px; }
+  .list{ list-style:none; }
+  .list li{
+    padding:10px 0; border-bottom:1px solid var(--line);
+  }
+  .note{ margin-top:18px; color:var(--grey); font-size:13.5px; }
+
+  /* ============ footer ============ */
+  footer{ border-top:1px solid var(--line); padding:48px 0 64px; }
+  .links{ display:flex; flex-wrap:wrap; gap:12px 36px; margin-top:8px; }
+  .links a{ font-family:var(--mono); font-size:12px; letter-spacing:.14em; }
+  .copy{ margin-top:36px; }
+
+  /* ============ motion ============ */
+  /* フィルムグレイン(素材感の統一。再生中の動画には掛からない) */
+  body::after{
+    content:""; position:fixed; inset:-120px; z-index:2000; pointer-events:none;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") repeat;
+    opacity:var(--grain);
+  }
+  .player.playing{ z-index:2001; }  /* 再生中はグレインより手前に出す */
+
+  /* サムネイル四隅の小ブラケット(ホバー/フォーカスで出現) */
+  .player::before,.player::after,.player button::before{
+    content:""; position:absolute; z-index:2; width:var(--bracket-sm); height:var(--bracket-sm);
+    border:1px solid var(--paper); opacity:0; pointer-events:none;
+  }
+  .player.empty::before,.player.empty::after,
+  .player.playing::before,.player.playing::after{ content:none; }
+  .player::before{ top:8px; left:8px; border-right:0; border-bottom:0; transform:translate(-6px,-6px); }
+  .player::after{ top:8px; right:8px; border-left:0; border-bottom:0; transform:translate(6px,-6px); }
+  .player button::before{ bottom:8px; left:8px; border-right:0; border-top:0; transform:translate(-6px,6px); }
+  .player:hover::before,.player:hover::after,.player:hover button::before,
+  .player:has(button:focus-visible)::before,.player:has(button:focus-visible)::after,
+  .player button:focus-visible::before{ opacity:.9; transform:translate(0,0); }
+  .player:hover button::after,
+  .player button:focus-visible::after{ background:var(--paper); color:var(--ink); }
+
+  /* 動きの定義はすべてここに集約(reduced-motion 環境では一切動かない) */
+  @media (prefers-reduced-motion: no-preference){
+    /* --- 起動シーケンス: ブラケット収束 → 文字 → ステータス点灯 --- */
+    .frame::before,.frame::after,.frame .b::before,.frame .b::after{
+      opacity:0; transition:opacity .5s var(--ease), transform .5s var(--ease);
+    }
+    .frame::before{ transform:translate(-10px,-10px); }
+    .frame::after{ transform:translate(10px,-10px); transition-delay:.06s; }
+    .frame .b::before{ transform:translate(-10px,10px); transition-delay:.12s; }
+    .frame .b::after{ transform:translate(10px,10px); transition-delay:.18s; }
+    body.is-ready .frame::before,body.is-ready .frame::after,
+    body.is-ready .frame .b::before,body.is-ready .frame .b::after{
+      opacity:.85; transform:translate(0,0);
+    }
+    h1 .ch{
+      display:inline-block; white-space:pre; opacity:0; transform:translateY(.38em);
+      transition:opacity .55s var(--ease), transform .55s var(--ease);
+      transition-delay:calc(.12s + var(--i, 0) * .045s);
+    }
+    body.is-ready h1 .ch{ opacity:1; transform:none; }
+    .hero .sub{ opacity:0; transform:translateY(10px);
+      transition:opacity .6s var(--ease) .5s, transform .6s var(--ease) .5s; }
+    .hero .statusline{ opacity:0; transition:opacity .7s var(--ease) .66s; }
+    body.is-ready .hero .sub{ opacity:1; transform:none; }
+    body.is-ready .hero .statusline{ opacity:1; }
+
+    /* --- スクロールで現れる(クラスはJSが付与。JSなしなら常に表示) --- */
+    .reveal{ opacity:0; transform:translateY(18px);
+      transition:opacity .6s var(--ease), transform .6s var(--ease); }
+    .reveal.in{ opacity:1; transform:none; }
+
+    /* --- こまかい所作 --- */
+    .player img{ transition:filter .35s ease, transform .9s var(--ease); }
+    .player:hover img{ transform:scale(1.03); }
+    .player::before,.player::after,.player button::before{
+      transition:opacity .3s var(--ease), transform .3s var(--ease); }
+    .player button::after{ transition:background .25s ease, color .25s ease; }
+    .player iframe{ animation:fade-in .45s var(--ease); }
+    .dot:not(.closed){ animation:pulse 2.8s ease-in-out infinite; }
+    body::after{ animation:grain .9s steps(1) infinite; }
+    @keyframes fade-in{ from{ opacity:0; } }
+    @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+    @keyframes grain{
+      0%,100%{ transform:translate(0,0); }
+      12%{ transform:translate(-30px,18px); }
+      25%{ transform:translate(22px,-26px); }
+      37%{ transform:translate(-14px,-30px); }
+      50%{ transform:translate(28px,24px); }
+      62%{ transform:translate(-26px,-8px); }
+      75%{ transform:translate(12px,30px); }
+      87%{ transform:translate(-18px,6px); }
+    }
+  }
+
+  @media (max-width:760px){
+    .work{ grid-template-columns:1fr; gap:16px; }
+    .cols{ grid-template-columns:1fr; gap:48px; }
+    .frame{ padding:48px 20px 40px; }
+    .hero{ padding:64px 0 48px; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto; }
+    .player img{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav wrap" aria-label="メイン">
+    <a class="brand" href="#top">FLEATZ</a>
+    <ul>
+      <li><a href="#works">WORKS</a></li>
+      <li><a href="#about">ABOUT</a></li>
+      <li><a href="#commission">COMMISSION</a></li>
+      <li><a href="#contact">CONTACT</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="hero wrap">
+    <div class="frame"><div class="b"></div>
+      <h1 id="siteName">Fleatz</h1>
+      <div class="sub">
+        <span class="role" id="siteRole"></span>
+        <span class="mono" id="siteTools"></span>
+      </div>
+      <div class="statusline">
+        <span id="statusCommission"></span>
+        <span id="statusCount"></span>
+      </div>
+    </div>
+  </div>
+
+  <section id="works" class="wrap">
+    <div class="sec-head">
+      <h2>Works</h2>
+    </div>
+    <div id="workList"></div>
+  </section>
+
+  <section id="about" class="wrap">
+    <div class="sec-head"><h2>About</h2></div>
+    <div class="cols">
+      <div class="about" id="bio"></div>
+      <div>
+        <dl class="meta-dl mono" id="aboutMeta"></dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="commission" class="wrap">
+    <div class="sec-head">
+      <h2>Commission</h2>
+      <span class="mono" id="commissionBadge"></span>
+    </div>
+    <div class="cols">
+      <ul class="list" id="acceptList"></ul>
+      <p class="note" id="commissionNote"></p>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <span class="mono">CONTACT</span>
+    <div class="links" id="linkList"></div>
+    <p class="copy mono">© <span id="year"></span> FLEATZ</p>
+  </div>
+</footer>
+
+<script src="works.js"></script>
+<script>
+/* works.js の内容を流し込むだけの描画コード。通常ここは編集不要 */
+(function(){
+  const $ = (id) => document.getElementById(id);
+
+  /* --- プロフィール --- */
+  $("siteRole").textContent  = PROFILE.role;
+  $("siteTools").textContent = PROFILE.tools.toUpperCase();
+  const open = PROFILE.commissionsOpen;
+  $("statusCommission").innerHTML =
+    `<span class="dot${open ? "" : " closed"}"></span>COMMISSIONS: ${open ? "OPEN" : "CLOSED"}`;
+  $("commissionBadge").textContent = open ? "STATUS: OPEN" : "STATUS: CLOSED";
+  $("year").textContent = new Date().getFullYear();
+
+  /* --- 自己紹介 --- */
+  $("bio").innerHTML = PROFILE.bio.map(p => `<p>${p}</p>`).join("");
+  $("aboutMeta").innerHTML = `
+    <div style="display:flex;gap:16px;padding:4px 0;font-size:11px;letter-spacing:.1em;color:var(--grey)">
+      <dt style="width:64px;opacity:.7">NAME</dt><dd>${PROFILE.name}</dd></div>
+    <div style="display:flex;gap:16px;padding:4px 0;font-size:11px;letter-spacing:.1em;color:var(--grey)">
+      <dt style="width:64px;opacity:.7">TOOLS</dt><dd>${PROFILE.tools}</dd></div>`;
+
+  /* --- 依頼 --- */
+  $("acceptList").innerHTML = PROFILE.commission.accepts
+    .map(a => `<li>${a}</li>`).join("");
+  $("commissionNote").textContent = PROFILE.commission.note;
+
+  /* --- リンク(URL未記入の行は自動で隠す。素のメールアドレスは mailto: を補う) --- */
+  $("linkList").innerHTML = PROFILE.links
+    .filter(l => l.url)
+    .map(l => {
+      const href = (l.url.includes("@") && !l.url.startsWith("mailto:"))
+        ? `mailto:${l.url}` : l.url;
+      return `<a href="${href}" target="_blank" rel="noopener">${l.label} ↗</a>`;
+    })
+    .join("");
+
+  /* --- 作品一覧 --- */
+  const pad = n => String(n).padStart(2, "0");
+  $("workList").innerHTML = WORKS.map((w, i) => {
+    const player = w.youtubeId
+      ? `<div class="player">
+           <img src="https://i.ytimg.com/vi/${w.youtubeId}/hqdefault.jpg" alt="" loading="lazy">
+           <button aria-label="${w.title} を再生" data-id="${w.youtubeId}"></button>
+         </div>`
+      : `<div class="player empty"><span class="mono">COMING SOON</span></div>`;
+    return `
+      <article class="work">
+        ${player}
+        <div class="meta">
+          <span class="idx">NO. ${pad(WORKS.length - i)}</span>
+          <h3>${w.title}</h3>
+          <dl>
+            <div><dt>YEAR</dt><dd>${w.year}</dd></div>
+            <div><dt>TYPE</dt><dd>${w.type}</dd></div>
+            <div><dt>TOOLS</dt><dd>${w.tools}</dd></div>
+          </dl>
+          ${w.note ? `<p class="work-note">${w.note}</p>` : ""}
+        </div>
+      </article>`;
+  }).join("");
+  $("statusCount").textContent = `WORKS: ${pad(WORKS.length)}`;
+
+  /* クリックで初めてYouTubeを読み込む(表示が軽くなる) */
+  document.querySelectorAll(".player button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const player = btn.parentElement;
+      player.classList.add("playing");
+      player.innerHTML =
+        `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1"
+          title="${btn.getAttribute("aria-label")}" allow="autoplay; encrypted-media; picture-in-picture"
+          allowfullscreen></iframe>`;
+    });
+  });
+
+  /* --- モーション演出(reduced-motion 環境では CSS 側ですべて無効) --- */
+  const motionOK = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+
+  /* h1 を1文字ずつ <span> に分解(起動時に文字が沈み込みから立ち上がる) */
+  if (motionOK){
+    const h1 = $("siteName"), text = h1.textContent;
+    h1.setAttribute("aria-label", text);
+    h1.innerHTML = [...text].map((c, i) =>
+      `<span class="ch" aria-hidden="true" style="--i:${i}">${c}</span>`).join("");
+  }
+
+  /* スクロールで現れる要素(クラスはJSで付与 → JSが無い環境では最初から見える) */
+  const revealTargets = [...document.querySelectorAll(
+    ".sec-head, #workList .work, .cols > *, footer .wrap")];
+  revealTargets.forEach(el => el.classList.add("reveal"));
+  if (motionOK && "IntersectionObserver" in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.filter(e => e.isIntersecting).forEach((e, k) => {
+        e.target.style.transitionDelay = `${k * 70}ms`;  /* 同時到達分だけ時差 */
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.1 });
+    revealTargets.forEach(el => io.observe(el));
+    /* キーボード移動で先に到達した要素は隠したままにしない */
+    document.addEventListener("focusin", (ev) => {
+      const r = ev.target.closest(".reveal");
+      if (r) r.classList.add("in");
+    });
+  } else {
+    revealTargets.forEach(el => el.classList.add("in"));
+  }
+
+  /* 起動シーケンス開始(初期状態が描画された次のフレームで) */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.body.classList.add("is-ready");
+  }));
+})();
+</script>
+</body>
+</html>
