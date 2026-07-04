@@ -53,6 +53,10 @@
 
     /* --- 動き --- */
     --ease: cubic-bezier(.22,1,.36,1);  /* 減速カーブ。全モーション共用 */
+    /* FLEATZ の文字出現アニメ(0にすると一瞬で全文字表示) */
+    --logo-duration: .4s;   /* 1文字ごとの表示にかかる時間(.2〜.8) */
+    --logo-delay: .05s;     /* 出現し始めるまでの待ち時間(0〜.3) */
+    --logo-stagger: .028s;  /* 文字ごとの時差。大きいほど1文字ずつ順に見える(0〜.08) */
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html{ scroll-behavior:smooth; }
@@ -219,8 +223,8 @@
     }
     h1 .ch{
       display:inline-block; white-space:pre; opacity:0; transform:translateY(.38em);
-      transition:opacity .4s var(--ease), transform .4s var(--ease);
-      transition-delay:calc(.05s + var(--i, 0) * .028s);
+      transition:opacity var(--logo-duration) var(--ease), transform var(--logo-duration) var(--ease);
+      transition-delay:calc(var(--logo-delay) + var(--i, 0) * var(--logo-stagger));
     }
     body.is-ready h1 .ch{ opacity:1; transform:none; }
     .hero .sub{ opacity:0; transform:translateY(10px);
@@ -316,12 +320,7 @@
 
   <section id="about" class="wrap">
     <div class="sec-head"><h2>About</h2></div>
-    <div class="cols">
-      <div class="about" id="bio"></div>
-      <div>
-        <dl class="meta-dl mono" id="aboutMeta"></dl>
-      </div>
-    </div>
+    <div class="about" id="bio"></div>
   </section>
 
   <section id="works" class="wrap">
@@ -368,11 +367,6 @@
 
   /* --- 自己紹介 --- */
   $("bio").innerHTML = PROFILE.bio.map(p => `<p>${p}</p>`).join("");
-  $("aboutMeta").innerHTML = `
-    <div style="display:flex;gap:16px;padding:4px 0;font-size:11px;letter-spacing:.1em;color:var(--grey)">
-      <dt style="width:64px;opacity:.7">NAME</dt><dd>${PROFILE.name}</dd></div>
-    <div style="display:flex;gap:16px;padding:4px 0;font-size:11px;letter-spacing:.1em;color:var(--grey)">
-      <dt style="width:64px;opacity:.7">TOOLS</dt><dd>${PROFILE.tools}</dd></div>`;
 
   /* --- 依頼 --- */
   $("acceptList").innerHTML = PROFILE.commission.accepts
@@ -441,7 +435,7 @@
 
   /* スクロールで現れる要素(クラスはJSで付与 → JSが無い環境では最初から見える) */
   const revealTargets = [...document.querySelectorAll(
-    ".sec-head, #workList .work, .cols > *, footer .wrap")];
+    ".sec-head, #bio, #workList .work, .cols > *, footer .wrap")];
   revealTargets.forEach(el => el.classList.add("reveal"));
   if (motionOK && "IntersectionObserver" in window){
     const io = new IntersectionObserver((entries) => {
