@@ -49,7 +49,6 @@
     --max: 1060px;        /* コンテンツ幅(960〜1200) */
     --h1-max: 168px;      /* FLEATZ の最大サイズ(120〜200) */
     --bracket: 22px;      /* ヒーロー四隅ブラケット(16〜32) */
-    --bracket-sm: 14px;   /* サムネイル四隅(10〜18) */
     --grain: .045;        /* フィルムグレインの濃さ(0でオフ〜.08) */
 
     /* --- 動き --- */
@@ -65,7 +64,9 @@
   a{ color:inherit; text-decoration:none; }
   a:hover{ opacity:.75; }
   :focus-visible{ outline:1px solid var(--paper); outline-offset:3px; }
-  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px; }
+  /* padding は left/right のみ指定(shorthand にすると section の
+     上下 padding をタイプセレクタより高い詳細度で上書きしてしまうため) */
+  .wrap{ max-width:var(--max); margin:0 auto; padding-left:24px; padding-right:24px; }
   .mono{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--grey); }
 
   /* ============ header ============ */
@@ -199,19 +200,6 @@
   }
   .player.playing{ z-index:2001; }  /* 再生中はグレインより手前に出す */
 
-  /* サムネイル四隅の小ブラケット(ホバー/フォーカスで出現) */
-  .player::before,.player::after,.player button::before{
-    content:""; position:absolute; z-index:2; width:var(--bracket-sm); height:var(--bracket-sm);
-    border:1px solid var(--paper); opacity:0; pointer-events:none;
-  }
-  .player.empty::before,.player.empty::after,
-  .player.playing::before,.player.playing::after{ content:none; }
-  .player::before{ top:8px; left:8px; border-right:0; border-bottom:0; transform:translate(-6px,-6px); }
-  .player::after{ top:8px; right:8px; border-left:0; border-bottom:0; transform:translate(6px,-6px); }
-  .player button::before{ bottom:8px; left:8px; border-right:0; border-top:0; transform:translate(-6px,6px); }
-  .player:hover::before,.player:hover::after,.player:hover button::before,
-  .player:has(button:focus-visible)::before,.player:has(button:focus-visible)::after,
-  .player button:focus-visible::before{ opacity:.9; transform:translate(0,0); }
   .player:hover button::after,
   .player button:focus-visible::after{ background:var(--paper); color:var(--ink); }
 
@@ -267,8 +255,6 @@
     /* --- こまかい所作 --- */
     .player img{ transition:filter .35s ease, transform .9s var(--ease); }
     .player:hover img{ transform:scale(1.03); }
-    .player::before,.player::after,.player button::before{
-      transition:opacity .3s var(--ease), transform .3s var(--ease); }
     .player button::after{ transition:background .25s ease, color .25s ease; }
     .player iframe{ animation:fade-in .45s var(--ease); }
     .dot:not(.closed){ animation:pulse 2.8s ease-in-out infinite; }
