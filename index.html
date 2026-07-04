@@ -90,7 +90,7 @@
     position:relative; padding:64px 40px 48px;
   }
   /* 四隅のブラケット */
-  .frame::before,.frame::after,
+ /* .frame::before,.frame::after,
   .frame .b::before,.frame .b::after{
     content:""; position:absolute; width:var(--bracket); height:var(--bracket);
     border:1px solid var(--paper); opacity:.85;
@@ -98,7 +98,7 @@
   .frame::before{ top:0; left:0;   border-right:0; border-bottom:0; }
   .frame::after { top:0; right:0;  border-left:0;  border-bottom:0; }
   .frame .b::before{ bottom:0; left:0;  border-right:0; border-top:0; }
-  .frame .b::after { bottom:0; right:0; border-left:0;  border-top:0; }
+  .frame .b::after { bottom:0; right:0; border-left:0;  border-top:0; }*/
   h1{
     font-family:var(--disp); font-weight:600;
     font-size:clamp(72px, 14vw, var(--h1-max));
@@ -231,15 +231,33 @@
     }
     h1 .ch{
       display:inline-block; white-space:pre; opacity:0; transform:translateY(.38em);
-      transition:opacity .55s var(--ease), transform .55s var(--ease);
-      transition-delay:calc(.12s + var(--i, 0) * .045s);
+      transition:opacity .4s var(--ease), transform .4s var(--ease);
+      transition-delay:calc(.05s + var(--i, 0) * .028s);
     }
     body.is-ready h1 .ch{ opacity:1; transform:none; }
     .hero .sub{ opacity:0; transform:translateY(10px);
-      transition:opacity .6s var(--ease) .5s, transform .6s var(--ease) .5s; }
-    .hero .statusline{ opacity:0; transition:opacity .7s var(--ease) .66s; }
+      transition:opacity .45s var(--ease) .3s, transform .45s var(--ease) .3s; }
+    .hero .statusline{ opacity:0; transition:opacity .5s var(--ease) .4s; }
     body.is-ready .hero .sub{ opacity:1; transform:none; }
     body.is-ready .hero .statusline{ opacity:1; }
+
+    /* --- ローディング(要素は motionOK 時のみ JS が生成) --- */
+    .preloader{
+      position:fixed; inset:0; z-index:3000; background:var(--ink);
+      display:flex; flex-direction:column; gap:16px;
+      align-items:center; justify-content:center;
+      transition:opacity .35s var(--ease);
+    }
+    .preloader .bar{
+      width:120px; height:1px; background:var(--line);
+      position:relative; overflow:hidden;
+    }
+    .preloader .bar::after{
+      content:""; position:absolute; inset:0; background:var(--paper);
+      transform:scaleX(0); transform-origin:left;
+      animation:load-fill .6s var(--ease) forwards;
+    }
+    @keyframes load-fill{ to{ transform:scaleX(1); } }
 
     /* --- スクロールで現れる(クラスはJSが付与。JSなしなら常に表示) --- */
     .reveal{ opacity:0; transform:translateY(18px);
@@ -287,8 +305,8 @@
   <nav class="nav wrap" aria-label="メイン">
     <a class="brand" href="#top">FLEATZ</a>
     <ul>
-      <li><a href="#works">WORKS</a></li>
       <li><a href="#about">ABOUT</a></li>
+      <li><a href="#works">WORKS</a></li>
       <li><a href="#commission">COMMISSION</a></li>
       <li><a href="#contact">CONTACT</a></li>
     </ul>
@@ -310,13 +328,6 @@
     </div>
   </div>
 
-  <section id="works" class="wrap">
-    <div class="sec-head">
-      <h2>Works</h2>
-    </div>
-    <div id="workList"></div>
-  </section>
-
   <section id="about" class="wrap">
     <div class="sec-head"><h2>About</h2></div>
     <div class="cols">
@@ -325,6 +336,13 @@
         <dl class="meta-dl mono" id="aboutMeta"></dl>
       </div>
     </div>
+  </section>
+
+  <section id="works" class="wrap">
+    <div class="sec-head">
+      <h2>Works</h2>
+    </div>
+    <div id="workList"></div>
   </section>
 
   <section id="commission" class="wrap">
@@ -457,10 +475,34 @@
     revealTargets.forEach(el => el.classList.add("in"));
   }
 
-  /* 起動シーケンス開始(初期状態が描画された次のフレームで) */
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+  /* ローディング → 起動シーケンス
+     フォント読込を待って(上限1.1秒)オーバーレイを閉じ、本編の演出を始める */
+  const startBoot = () => requestAnimationFrame(() => requestAnimationFrame(() => {
     document.body.classList.add("is-ready");
   }));
+  if (motionOK){
+    const pre = document.createElement("div");
+    pre.className = "preloader";
+    pre.setAttribute("aria-hidden", "true");
+    pre.innerHTML = '<span class="mono">LOADING</span><span class="bar"></span>';
+    document.body.appendChild(pre);
+    const t0 = performance.now();
+    const close = () => {
+      /* バーが描き切るまでは最低限見せる(体感0.65秒) */
+      const hold = Math.max(0, 650 - (performance.now() - t0));
+      setTimeout(() => {
+        pre.style.opacity = "0";
+        startBoot();
+        setTimeout(() => pre.remove(), 400);
+      }, hold);
+    };
+    Promise.race([
+      document.fonts ? document.fonts.ready : Promise.resolve(),
+      new Promise(r => setTimeout(r, 1100)),
+    ]).then(close, close);
+  } else {
+    startBoot();
+  }
 })();
 </script>
 </body>
