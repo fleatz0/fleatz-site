@@ -41,9 +41,10 @@
 
     /* --- フォント(Adobe Fonts / キット ucv5eqg。変更はキット側と揃える) --- */
     --disp: "obviously-narrow", sans-serif;         /* 大見出し FLEATZ / h2 */
-    --body: "dnp-shuei-gothic-gin-std", sans-serif; /* 本文(和文) */
+    /* DIN 2014 は和文グリフを持たないため、和文は秀英角ゴシックにフォールバック
+       (英数字は DIN 2014、日本語は秀英角ゴシックで描画される) */
+    --body: "din-2014", "dnp-shuei-gothic-gin-std", sans-serif; /* 本文 */
     --mono: "input-mono-condensed", monospace;      /* 目録・HUD表記 */
-    /* 予備: "din-2014" もキットに読込済み(未使用) */
 
     /* --- 寸法・質感 --- */
     --max: 1060px;        /* コンテンツ幅(960〜1200) */
@@ -187,10 +188,9 @@
     display:flex; align-items:center; justify-content:center;
     border:1px dashed var(--line);
   }
-  .meta .idx{ font-family:var(--mono); font-size:11px; color:var(--grey); letter-spacing:.14em; }
   .meta h3{
     font-family:var(--body); font-weight:500; font-size:17px;
-    margin:8px 0 10px; line-height:1.6;
+    margin:0 0 10px; line-height:1.6;
   }
   .meta dl{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--grey); }
   .meta dl div{ display:flex; gap:16px; padding:3px 0; }
@@ -281,10 +281,8 @@
     .player:hover img{ transform:scale(1.03); }
     .player button::after, .player .img-link::after{ transition:background .25s ease, color .25s ease; }
     .player iframe{ animation:fade-in .45s var(--ease); }
-    .dot:not(.closed){ animation:pulse 2.8s ease-in-out infinite; }
     body::after{ animation:grain .9s steps(1) infinite; }
     @keyframes fade-in{ from{ opacity:0; } }
-    @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
     @keyframes grain{
       0%,100%{ transform:translate(0,0); }
       12%{ transform:translate(-30px,18px); }
@@ -405,7 +403,7 @@
 
   /* --- 作品一覧(カテゴリごとにグループ化) --- */
   const pad = n => String(n).padStart(2, "0");
-  const renderWork = (w, idx, count) => {
+  const renderWork = (w) => {
     const player = w.youtubeId
       ? `<div class="player">
            <img src="https://i.ytimg.com/vi/${w.youtubeId}/hqdefault.jpg" alt="" loading="lazy">
@@ -422,7 +420,6 @@
       <article class="work">
         ${player}
         <div class="meta">
-          <span class="idx">NO. ${pad(count - idx)}</span>
           <h3>${w.title}</h3>
           <dl>
             <div><dt>YEAR</dt><dd>${w.year}</dd></div>
@@ -434,7 +431,7 @@
   };
   $("workList").innerHTML = WORK_CATEGORIES.map(cat => {
     const items = WORKS.filter(w => w.category === cat);
-    const cards = items.map((w, i) => renderWork(w, i, items.length)).join("");
+    const cards = items.map(w => renderWork(w)).join("");
     return `
       <div class="work-group">
         <div class="group-head"><h3>${cat}</h3><span class="mono">${pad(items.length)}</span></div>
