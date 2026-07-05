@@ -54,7 +54,6 @@ const WORKS = [
     title: "BREAK IT DOWN — Fleatz part",
     year: "2022",
     type: "ロゴモーション / 合作パート",
-    tools: "After Effects / Blender",
     note: "",  // ← 一言(空なら非表示)
   },
   {
@@ -63,7 +62,6 @@ const WORKS = [
     title: "シックス・フィート・アンダー / Aqu3ra 二次創作MV",
     year: "2022",
     type: "二次創作MV / #PVSF2022Sp",
-    tools: "After Effects / Blender",
     note: "",  // ← 一言(空なら非表示)
   },
   {
@@ -72,7 +70,6 @@ const WORKS = [
     title: "リテラシー / wotaku 二次創作MV",
     year: "2022",
     type: "文字PV / 二次創作MV",
-    tools: "After Effects",
     note: "",  // ← 一言(空なら非表示)
   },
   {
@@ -81,8 +78,16 @@ const WORKS = [
     title: "Crystallized",
     year: "2022",
     type: "自主制作 / 短尺",
-    tools: "After Effects / Blender",
     note: "",  // ← 一言(空なら非表示)
+  },
+  {
+    category: "ロゴデザイン",
+    youtubeId: "",
+    image: "images/works/PVSF_logo.png",  // images/works/ に画像を置いてパスを指定
+    title: "PVSF logo",
+    year: "2022",
+    type: "ロゴ",
+    note: "映像上映イベントPVSFのロゴです。",
   },
   /* --- 動画作品を追加する時はこのブロックをコピーして使う ---
   {
@@ -91,7 +96,6 @@ const WORKS = [
     title: "",
     year: "2026",
     type: "",
-    tools: "",
     note: "",
   },
   ------------------------------------------------- */
@@ -104,7 +108,6 @@ const WORKS = [
     title: "",
     year: "2026",
     type: "",
-    tools: "",
     note: "",
   },
   ------------------------------------------------- */
