@@ -17,7 +17,7 @@
 
 /* WORKS に表示するカテゴリと、その表示順。
    ここに無いカテゴリ名を WORKS の category に書いても表示されないので注意 */
-const WORK_CATEGORIES = ["映像制作", "ロゴデザイン"];
+const WORK_CATEGORIES = ["映像制作", "3DCG", "ロゴデザイン"];
 
 const PROFILE = {
   name: "Fleatz",
@@ -95,7 +95,7 @@ const WORKS = [
     title: "PVSF logo",
     year: "2022",
     type: "ロゴ",
-    note: "映像上映イベントPVSFのロゴです。",
+    note: "映像上映イベントPVSFのロゴを作成しました。",
   },
   /* --- 動画作品を追加する時はこのブロックをコピーして使う ---
   {
@@ -108,9 +108,9 @@ const WORKS = [
   },
   ------------------------------------------------- */
 
-  /* --- ロゴ等、静止画の作品を追加する時はこちらをコピー ---
+  /* --- ロゴ・3DCGスチルなど、静止画の作品を追加する時はこちらをコピー ---
   {
-    category: "ロゴデザイン",
+    category: "ロゴデザイン",  // または "3DCG"
     youtubeId: "",
     image: "images/works/ファイル名.png",  // images/works/ に画像を置いてパスを指定
     title: "",
