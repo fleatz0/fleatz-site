@@ -80,6 +80,14 @@ const WORKS = [
     type: "自主制作 / 短尺",
     note: "",  // ← 一言(空なら非表示)
   },
+    {
+    category: "映像制作",
+    youtubeId: "l7-ZicpdhvM",
+    title: "Elevator",
+    year: "2021",
+    type: "3DCG / 自主制作",
+    note: "",
+  },
   {
     category: "ロゴデザイン",
     youtubeId: "",
