@@ -3,12 +3,20 @@
    ---------------------------------------------------------
    ・作品を追加する: WORKS の配列に { ... } を1ブロック足す
    ・並び順: 配列の上から順に表示される(新作を先頭に)
+   ・category: WORK_CATEGORIES のいずれかと完全一致させる
+     (WORKS内での並び順に関わらず、カテゴリごとにグループ表示される)
    ・youtubeId: 動画URLの watch?v= の後ろの11文字
      例) https://www.youtube.com/watch?v=WMJsnOeGG1o → "WMJsnOeGG1o"
+     ロゴデザインなど動画がない作品は "" のままでよい(静止画で表示したい
+     場合は player の仕組みごと変更が必要なので、まずは相談を)
    ・youtubeId が空("")の作品は「準備中」表示になる
    ・note: 作品への一言(制作意図・こだわった箇所など)。
      空("")なら何も表示されない。自分の言葉で書くこと
    ========================================================= */
+
+/* WORKS に表示するカテゴリと、その表示順。
+   ここに無いカテゴリ名を WORKS の category に書いても表示されないので注意 */
+const WORK_CATEGORIES = ["映像制作", "ロゴデザイン"];
 
 const PROFILE = {
   name: "Fleatz",
@@ -40,6 +48,7 @@ const PROFILE = {
 
 const WORKS = [
   {
+    category: "映像制作",
     youtubeId: "WMJsnOeGG1o",
     title: "BREAK IT DOWN — Fleatz part",
     year: "2022",
@@ -48,6 +57,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
   {
+    category: "映像制作",
     youtubeId: "1YRfjEukN0s",
     title: "シックス・フィート・アンダー / Aqu3ra 二次創作MV",
     year: "2022",
@@ -56,6 +66,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
   {
+    category: "映像制作",
     youtubeId: "zCdL8Cusa1o",
     title: "リテラシー / wotaku 二次創作MV",
     year: "2022",
@@ -64,6 +75,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
   {
+    category: "映像制作",
     youtubeId: "J31PCcMarDs",
     title: "Crystallized",
     year: "2022",
@@ -73,6 +85,7 @@ const WORKS = [
   },
   /* --- 追加する時はこのブロックをコピーして使う ---
   {
+    category: "映像制作",  // または "ロゴデザイン"
     youtubeId: "",
     title: "",
     year: "2026",

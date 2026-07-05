@@ -54,9 +54,9 @@
     /* --- 動き --- */
     --ease: cubic-bezier(.22,1,.36,1);  /* 減速カーブ。全モーション共用 */
     /* FLEATZ の文字出現アニメ(0にすると一瞬で全文字表示) */
-    --logo-duration: .8s;   /* 1文字ごとの表示にかかる時間(.2〜.8) */
-    --logo-delay: .05s;     /* 出現し始めるまでの待ち時間(0〜.3) */
-    --logo-stagger: .028s;  /* 文字ごとの時差。大きいほど1文字ずつ順に見える(0〜.08) */
+    --logo-duration: 1.5s;   /* 1文字ごとの表示にかかる時間(.2〜.8) */
+    --logo-delay: .2s;     /* 出現し始めるまでの待ち時間(0〜.3) */
+    --logo-stagger: .05s;  /* 文字ごとの時差。大きいほど1文字ずつ順に見える(0〜.08) */
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   html{ scroll-behavior:smooth; }
@@ -139,6 +139,22 @@
   }
 
   /* ============ works: 目録形式 ============ */
+  .work-group + .work-group{
+    margin-top:56px; padding-top:56px; border-top:1px solid var(--line);
+  }
+  .group-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:24px;
+  }
+  .group-head h3{
+    font-family:var(--mono); font-size:13px; letter-spacing:.16em;
+    color:var(--paper);
+  }
+  .group-head .mono{ color:var(--grey); }
+  .group-empty{
+    font-family:var(--mono); font-size:12px; letter-spacing:.1em;
+    color:var(--grey); padding:4px 0 8px;
+  }
   .work{
     display:grid; grid-template-columns:minmax(0,420px) 1fr;
     gap:28px; padding:28px 0; border-top:1px solid var(--line);
@@ -383,9 +399,9 @@
     })
     .join("");
 
-  /* --- 作品一覧 --- */
+  /* --- 作品一覧(カテゴリごとにグループ化) --- */
   const pad = n => String(n).padStart(2, "0");
-  $("workList").innerHTML = WORKS.map((w, i) => {
+  const renderWork = (w, idx, count) => {
     const player = w.youtubeId
       ? `<div class="player">
            <img src="https://i.ytimg.com/vi/${w.youtubeId}/hqdefault.jpg" alt="" loading="lazy">
@@ -396,7 +412,7 @@
       <article class="work">
         ${player}
         <div class="meta">
-          <span class="idx">NO. ${pad(WORKS.length - i)}</span>
+          <span class="idx">NO. ${pad(count - idx)}</span>
           <h3>${w.title}</h3>
           <dl>
             <div><dt>YEAR</dt><dd>${w.year}</dd></div>
@@ -406,6 +422,15 @@
           ${w.note ? `<p class="work-note">${w.note}</p>` : ""}
         </div>
       </article>`;
+  };
+  $("workList").innerHTML = WORK_CATEGORIES.map(cat => {
+    const items = WORKS.filter(w => w.category === cat);
+    const cards = items.map((w, i) => renderWork(w, i, items.length)).join("");
+    return `
+      <div class="work-group">
+        <div class="group-head"><h3>${cat}</h3><span class="mono">${pad(items.length)}</span></div>
+        ${items.length ? cards : `<p class="group-empty">COMING SOON</p>`}
+      </div>`;
   }).join("");
   $("statusCount").textContent = `WORKS: ${pad(WORKS.length)}`;
 
@@ -435,7 +460,7 @@
 
   /* スクロールで現れる要素(クラスはJSで付与 → JSが無い環境では最初から見える) */
   const revealTargets = [...document.querySelectorAll(
-    ".sec-head, #bio, #workList .work, .cols > *, footer .wrap")];
+    ".sec-head, #bio, .group-head, #workList .work, #workList .group-empty, .cols > *, footer .wrap")];
   revealTargets.forEach(el => el.classList.add("reveal"));
   if (motionOK && "IntersectionObserver" in window){
     const io = new IntersectionObserver((entries) => {
