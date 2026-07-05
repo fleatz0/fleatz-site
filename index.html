@@ -44,7 +44,7 @@
     /* DIN 2014 は和文グリフを持たないため、和文は秀英角ゴシックにフォールバック
        (英数字は DIN 2014、日本語は秀英角ゴシックで描画される) */
     --body: "din-2014", "dnp-shuei-gothic-gin-std", sans-serif; /* 本文 */
-    --mono: "input-mono-condensed", monospace;      /* 目録・HUD表記 */
+    --mono: "din-2014", monospace;      /* 目録・HUD表記 */
 
     /* --- 寸法・質感 --- */
     --max: 1060px;        /* コンテンツ幅(960〜1200) */
@@ -380,7 +380,7 @@
   const open = PROFILE.commissionsOpen;
   $("statusCommission").innerHTML =
     `<span class="dot${open ? "" : " closed"}"></span>COMMISSIONS: ${open ? "OPEN" : "CLOSED"}`;
-  $("commissionBadge").textContent = open ? "STATUS: OPEN" : "STATUS: CLOSED";
+  //$("commissionBadge").textContent = open ? "STATUS: OPEN" : "STATUS: CLOSED";
   $("year").textContent = new Date().getFullYear();
 
   /* --- 自己紹介 --- */
@@ -395,8 +395,10 @@
   $("linkList").innerHTML = PROFILE.links
     .filter(l => l.url)
     .map(l => {
-      const href = (l.url.includes("@") && !l.url.startsWith("mailto:"))
-        ? `mailto:${l.url}` : l.url;
+      // http(s):/mailto: で始まる場合はそのまま。それ以外で "@" を含むものだけ
+      // 素のメールアドレスとみなす(YouTubeの @ハンドル等をURLごと誤爆させないため)
+      const isSchemed = /^(https?:|mailto:)/i.test(l.url);
+      const href = (!isSchemed && l.url.includes("@")) ? `mailto:${l.url}` : l.url;
       return `<a href="${href}" target="_blank" rel="noopener">${l.label} ↗</a>`;
     })
     .join("");
