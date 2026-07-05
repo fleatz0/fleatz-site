@@ -170,12 +170,14 @@
     filter:grayscale(1) contrast(1.05);
     transition:filter .35s ease;
   }
-  .player button{
+  /* ロゴ等の静止画はトリミングせず全体を見せる(letterbox は --ink-2 で埋まる) */
+  .player.image img{ object-fit:contain; }
+  .player button, .player .img-link{
     position:absolute; inset:0; width:100%; height:100%;
-    background:transparent; border:0; cursor:pointer;
+    display:block; background:transparent; border:0; cursor:pointer;
   }
-  .player button::after{
-    content:"▶ PLAY"; position:absolute; right:10px; bottom:8px;
+  .player button::after, .player .img-link::after{
+    content:attr(data-label); position:absolute; right:10px; bottom:8px;
     font-family:var(--mono); font-size:10px; letter-spacing:.18em;
     color:var(--paper); background:rgba(11,11,12,.72); padding:4px 8px;
   }
@@ -220,8 +222,10 @@
   }
   .player.playing{ z-index:2001; }  /* 再生中はグレインより手前に出す */
 
-  .player:hover button::after,
-  .player button:focus-visible::after{ background:var(--paper); color:var(--ink); }
+  .player:hover button::after, .player:hover .img-link::after,
+  .player button:focus-visible::after, .player .img-link:focus-visible::after{
+    background:var(--paper); color:var(--ink);
+  }
 
   /* 動きの定義はすべてここに集約(reduced-motion 環境では一切動かない) */
   @media (prefers-reduced-motion: no-preference){
@@ -275,7 +279,7 @@
     /* --- こまかい所作 --- */
     .player img{ transition:filter .35s ease, transform .9s var(--ease); }
     .player:hover img{ transform:scale(1.03); }
-    .player button::after{ transition:background .25s ease, color .25s ease; }
+    .player button::after, .player .img-link::after{ transition:background .25s ease, color .25s ease; }
     .player iframe{ animation:fade-in .45s var(--ease); }
     .dot:not(.closed){ animation:pulse 2.8s ease-in-out infinite; }
     body::after{ animation:grain .9s steps(1) infinite; }
@@ -405,7 +409,13 @@
     const player = w.youtubeId
       ? `<div class="player">
            <img src="https://i.ytimg.com/vi/${w.youtubeId}/hqdefault.jpg" alt="" loading="lazy">
-           <button aria-label="${w.title} を再生" data-id="${w.youtubeId}"></button>
+           <button aria-label="${w.title} を再生" data-id="${w.youtubeId}" data-label="▶ PLAY"></button>
+         </div>`
+      : w.image
+      ? `<div class="player image">
+           <img src="${w.image}" alt="" loading="lazy">
+           <a class="img-link" href="${w.image}" target="_blank" rel="noopener"
+              aria-label="${w.title} を拡大表示" data-label="VIEW ↗"></a>
          </div>`
       : `<div class="player empty"><span class="mono">COMING SOON</span></div>`;
     return `
