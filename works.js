@@ -109,7 +109,7 @@ const WORKS = [
   {
     category: "3DCG",
     youtubeId: "",
-    image: "images/works/ship.png",  // images/works/ に画像を置いてパスを指定
+    image: "images/works/ship.jpg",  // images/works/ に画像を置いてパスを指定
     title: "yacht",
     year: "2023",
     type: "",

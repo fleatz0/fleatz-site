@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fleatz — Motion Design / 3DCG</title>
-<meta name="description" content="Fleatz — After Effects と Blender による映像制作。二次創作MV、リリックモーション、3DCG。">
+<meta name="description" content="Fleatz — 3DCGとモーショングラフィックスを組み合わせた映像制作と、ロゴ・グラフィックデザイン。二次創作MV、リリックモーション、3DCG。">
 <meta name="theme-color" content="#0B0B0C">
 <meta property="og:title" content="Fleatz — Motion Design / 3DCG">
-<meta property="og:description" content="After Effects と Blender による映像制作。二次創作MV、リリックモーション、3DCG。">
+<meta property="og:description" content="3DCGとモーショングラフィックスを組み合わせた映像制作と、ロゴ・グラフィックデザイン。">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:url" content="https://fleatz.jp/">
@@ -44,12 +44,11 @@
     /* DIN 2014 は和文グリフを持たないため、和文は秀英角ゴシックにフォールバック
        (英数字は DIN 2014、日本語は秀英角ゴシックで描画される) */
     --body: "din-2014", "dnp-shuei-gothic-gin-std", sans-serif; /* 本文 */
-    --mono: "din-2014", monospace;      /* 目録・HUD表記 */
+    --mono: "din-2014", sans-serif;     /* 目録・HUD表記(等幅は廃止、DIN 2014に統一) */
 
     /* --- 寸法・質感 --- */
     --max: 1060px;        /* コンテンツ幅(960〜1200) */
     --h1-max: 168px;      /* FLEATZ の最大サイズ(120〜200) */
-    --bracket: 22px;      /* ヒーロー四隅ブラケット(16〜32) */
     --grain: .045;        /* フィルムグレインの濃さ(0でオフ〜.08) */
 
     /* --- 動き --- */
@@ -76,7 +75,8 @@
 
   /* ============ header ============ */
   header{
-    position:sticky; top:0; z-index:10;
+    /* グレイン(2000)・再生中プレイヤー(2001)より常に手前 */
+    position:sticky; top:0; z-index:2002;
     background:color-mix(in srgb, var(--ink) 88%, transparent);
     backdrop-filter:blur(8px);
     border-bottom:1px solid var(--line);
@@ -90,21 +90,11 @@
   .nav a{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--grey); }
   .nav a:hover{ color:var(--paper); opacity:1; }
 
-  /* ============ hero(ファインダー枠) ============ */
-  .hero{ padding:96px 0 72px; position:relative; }
-  .frame{
-    position:relative; padding:64px 40px 48px;
-  }
-  /* 四隅のブラケット */
- /* .frame::before,.frame::after,
-  .frame .b::before,.frame .b::after{
-    content:""; position:absolute; width:var(--bracket); height:var(--bracket);
-    border:1px solid var(--paper); opacity:.85;
-  }
-  .frame::before{ top:0; left:0;   border-right:0; border-bottom:0; }
-  .frame::after { top:0; right:0;  border-left:0;  border-bottom:0; }
-  .frame .b::before{ bottom:0; left:0;  border-right:0; border-top:0; }
-  .frame .b::after { bottom:0; right:0; border-left:0;  border-top:0; }*/
+  /* ============ hero ============ */
+  /* 縦だけ longhand で指定(.wrap の左右 padding を shorthand で潰さないため) */
+  .hero{ padding-top:96px; padding-bottom:72px; }
+  /* 左右paddingなし: FLEATZ の左端を各セクションと揃える */
+  .frame{ padding:64px 0 48px; }
   h1{
     font-family:var(--disp); font-weight:600;
     font-size:clamp(72px, 14vw, var(--h1-max));
@@ -229,18 +219,7 @@
 
   /* 動きの定義はすべてここに集約(reduced-motion 環境では一切動かない) */
   @media (prefers-reduced-motion: no-preference){
-    /* --- 起動シーケンス: ブラケット収束 → 文字 → ステータス点灯 --- */
-    .frame::before,.frame::after,.frame .b::before,.frame .b::after{
-      opacity:0; transition:opacity .5s var(--ease), transform .5s var(--ease);
-    }
-    .frame::before{ transform:translate(-10px,-10px); }
-    .frame::after{ transform:translate(10px,-10px); transition-delay:.06s; }
-    .frame .b::before{ transform:translate(-10px,10px); transition-delay:.12s; }
-    .frame .b::after{ transform:translate(10px,10px); transition-delay:.18s; }
-    body.is-ready .frame::before,body.is-ready .frame::after,
-    body.is-ready .frame .b::before,body.is-ready .frame .b::after{
-      opacity:.85; transform:translate(0,0);
-    }
+    /* --- 起動シーケンス: 文字 → ステータス点灯 --- */
     h1 .ch{
       display:inline-block; white-space:pre; opacity:0; transform:translateY(.38em);
       transition:opacity var(--logo-duration) var(--ease), transform var(--logo-duration) var(--ease);
@@ -298,8 +277,11 @@
   @media (max-width:760px){
     .work{ grid-template-columns:1fr; gap:16px; }
     .cols{ grid-template-columns:1fr; gap:48px; }
-    .frame{ padding:48px 20px 40px; }
-    .hero{ padding:64px 0 48px; }
+    .frame{ padding:48px 0 40px; }
+    .hero{ padding-top:64px; padding-bottom:48px; }
+  }
+  @media (max-width:430px){
+    .nav ul{ gap:14px; }  /* 幅360px級の端末でナビがはみ出さないように */
   }
   @media (prefers-reduced-motion:reduce){
     html{ scroll-behavior:auto; }
@@ -323,7 +305,7 @@
 
 <main id="top">
   <div class="hero wrap">
-    <div class="frame"><div class="b"></div>
+    <div class="frame">
       <h1 id="siteName">Fleatz</h1>
       <div class="sub">
         <span class="role" id="siteRole"></span>
@@ -399,16 +381,24 @@
       // 素のメールアドレスとみなす(YouTubeの @ハンドル等をURLごと誤爆させないため)
       const isSchemed = /^(https?:|mailto:)/i.test(l.url);
       const href = (!isSchemed && l.url.includes("@")) ? `mailto:${l.url}` : l.url;
-      return `<a href="${href}" target="_blank" rel="noopener">${l.label} ↗</a>`;
+      /* mailto に target=_blank を付けると空タブが開くブラウザがあるため外部URLのみ */
+      const ext = href.startsWith("mailto:") ? "" : ` target="_blank" rel="noopener"`;
+      return `<a href="${href}"${ext}>${l.label} ↗</a>`;
     })
     .join("");
 
   /* --- 作品一覧(カテゴリごとにグループ化) --- */
   const pad = n => String(n).padStart(2, "0");
   const renderWork = (w) => {
+    /* サムネイルは高解像度(maxres)を優先し、用意がない動画は hq に自動で切り替える */
+    const hq = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    const fallback = (id) =>
+      `if(!this.dataset.f){this.dataset.f=1;this.src='${hq(id)}'}`;
     const player = w.youtubeId
       ? `<div class="player">
-           <img src="https://i.ytimg.com/vi/${w.youtubeId}/hqdefault.jpg" alt="" loading="lazy">
+           <img src="https://i.ytimg.com/vi/${w.youtubeId}/maxresdefault.jpg" alt="" loading="lazy"
+                onerror="${fallback(w.youtubeId)}"
+                onload="if(this.naturalWidth<320){${fallback(w.youtubeId)}}">
            <button aria-label="${w.title} を再生" data-id="${w.youtubeId}" data-label="▶ PLAY"></button>
          </div>`
       : w.image
@@ -424,8 +414,8 @@
         <div class="meta">
           <h3>${w.title}</h3>
           <dl>
-            <div><dt>YEAR</dt><dd>${w.year}</dd></div>
-            <div><dt>TYPE</dt><dd>${w.type}</dd></div>
+            ${w.year ? `<div><dt>YEAR</dt><dd>${w.year}</dd></div>` : ""}
+            ${w.type ? `<div><dt>TYPE</dt><dd>${w.type}</dd></div>` : ""}
           </dl>
           ${w.note ? `<p class="work-note">${w.note}</p>` : ""}
         </div>
