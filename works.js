@@ -97,17 +97,17 @@ const WORKS = [
     type: "ロゴ",
     note: "映像上映イベントPVSFのロゴを作成しました。",
   },
-    {
-    category: "3DCG",  // または "3DCG"
+  {
+    category: "3DCG",
     youtubeId: "",
-    image: "images/works/volume2.png",  // images/works/ に画像を置いてパスを指定
+    image: "images/works/volume2.jpg",  // images/works/ に画像を置いてパスを指定
     title: "H2O",
     year: "2026",
     type: "",
     note: "",
   },
-    {
-    category: "3DCG", 
+  {
+    category: "3DCG",
     youtubeId: "",
     image: "images/works/ship.png",  // images/works/ に画像を置いてパスを指定
     title: "yacht",
