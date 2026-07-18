@@ -33,7 +33,7 @@ const PROFILE = {
   // 連絡先・リンク(不要な行は消してよい)
   links: [
     { label: "YouTube", url: "https://www.youtube.com/@Fleatz" },
-    { label: "X (Twitter)", url: "" },      // ← 再開したら記入
+    { label: "X (Twitter)", url: "https://x.com/Fleatz_" },      // ← 再開したら記入
     { label: "Mail", url: "fleatz123@gmail.com" },             // ← 例: "mailto:xxx@example.com"
   ],
   // 依頼について(COMMISSIONに表示)
