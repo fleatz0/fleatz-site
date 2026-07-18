@@ -6,6 +6,10 @@
 <title>Fleatz — Motion Design / 3DCG</title>
 <meta name="description" content="Fleatz — 3DCGとモーショングラフィックスを組み合わせた映像制作と、ロゴ・グラフィックデザイン。二次創作MV、リリックモーション、3DCG。">
 <meta name="theme-color" content="#0B0B0C">
+<!-- favicon(ブランドマーク。タブはページ外なのでフルカラー可)。透過PNG＋iOS用の暗タイル -->
+<link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon/favicon-192.png">
+<link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
 <meta property="og:title" content="Fleatz — Motion Design / 3DCG">
 <meta property="og:description" content="3DCGとモーショングラフィックスを組み合わせた映像制作と、ロゴ・グラフィックデザイン。">
 <meta property="og:type" content="website">
@@ -335,6 +339,7 @@
       </div>
       <div class="statusline">
         <span id="statusCommission"></span>
+        <span id="statusCount"></span>
       </div>
     </div>
   </div>
@@ -443,10 +448,11 @@
     const cards = items.map(w => renderWork(w)).join("");
     return `
       <div class="work-group">
-        <div class="group-head"><h3>${cat}</h3><span class="mono">${pad(items.length)}</span></div>
+        <div class="group-head"><h3>${cat}</h3></div>
         ${items.length ? cards : `<p class="group-empty">COMING SOON</p>`}
       </div>`;
   }).join("");
+  $("statusCount").textContent = `WORKS: ${pad(WORKS.length)}`;
 
   /* クリックで初めてYouTubeを読み込む(表示が軽くなる) */
   document.querySelectorAll(".player button").forEach(btn => {
