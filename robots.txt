@@ -1,0 +1,5 @@
+# 全クローラーに全ページの巡回を許可(制限したいものが出たらここに追記)
+User-agent: *
+Allow: /
+
+Sitemap: https://fleatz.jp/sitemap.xml
