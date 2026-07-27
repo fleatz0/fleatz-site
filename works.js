@@ -62,7 +62,7 @@ const WORKS = [
     title: "シックス・フィート・アンダー / Aqu3ra 二次創作MV",
     year: "2022",
     type: "二次創作MV / #PVSF2022Sp",
-    note: "",  // ← 一言(空なら非表示)
+    note: "PVSF2022Sp 出展映像",  // ← 一言(空なら非表示)
   },
   {
     category: "映像制作",
