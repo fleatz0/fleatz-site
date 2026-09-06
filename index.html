@@ -27,7 +27,7 @@
 <!-- FONTS: Adobe Fonts(WebプロジェクトID: ucv5eqg)
      和文フォントが動的サブセット配信のため <link> ではなく JS 埋め込みが必須。
      フォントの追加・変更は fonts.adobe.com の Webプロジェクト側で行い、
-     :root の --disp / --body / --mono の名前を対応させる -->
+     :root の --disp / --body / --nav-font の名前を対応させる -->
 <link rel="preconnect" href="https://use.typekit.net" crossorigin>
 <script>
   (function(d){
@@ -36,543 +36,345 @@
   })(document);
 </script>
 <style>
-  /* =====================================================
-     DESIGN TOKENS — デザインの手動調整はまずここをいじる
-     下の見た目CSSを触らなくても、ここだけでかなり変わる。
-     コメントの括弧内は破綻しにくい調整範囲の目安。
-     ===================================================== */
-  :root{
-    /* --- 色(モノクロ基調は維持。--signal は受付状態の点のみ) --- */
-    --ink:      #0B0B0C;   /* 背景 */
-    --ink-2:    #121214;   /* 面(サムネイル下地など) */
-    --paper:    #EDEDEB;   /* 主文字 */
-    --grey:     #8B8B90;   /* 補助文字 */
-    --line:     rgba(237,237,235,.16);  /* 罫線 */
-    --signal:   #C6F548;   /* 受付状態の点。ここ以外に使わない */
-
-    /* --- フォント(Adobe Fonts / キット ucv5eqg。変更はキット側と揃える) --- */
-    --disp: "obviously-narrow", sans-serif;         /* 大見出し FLEATZ / h2 */
-    /* DIN 2014 は和文グリフを持たないため、和文は秀英角ゴシックにフォールバック
-       (英数字は DIN 2014、日本語は秀英角ゴシックで描画される) */
-    --body: "din-2014", "dnp-shuei-gothic-gin-std", sans-serif; /* 本文 */
-    --mono: "din-2014", sans-serif;     /* 目録・HUD表記(等幅は廃止、DIN 2014に統一) */
-
-    /* --- 寸法・質感 --- */
-    --max: 1060px;        /* コンテンツ幅(960〜1200) */
-    --h1-max: 168px;      /* FLEATZ の最大サイズ(120〜200) */
-    --grain: .045;        /* フィルムグレインの濃さ(0でオフ〜.08) */
-
-    /* --- 動き --- */
-    --ease: cubic-bezier(.22,1,.36,1);  /* 減速カーブ。全モーション共用 */
-    /* FLEATZ の文字出現アニメ(0にすると一瞬で全文字表示) */
-    --logo-duration: 1.5s;   /* 1文字ごとの表示にかかる時間(.2〜.8) */
-    --logo-delay: .2s;     /* 出現し始めるまでの待ち時間(0〜.3) */
-    --logo-stagger: .05s;  /* 文字ごとの時差。大きいほど1文字ずつ順に見える(0〜.08) */
-  }
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
-  body{
-    background:var(--ink); color:var(--paper);
-    font-family:var(--body); font-size:15px; line-height:1.9;
-    -webkit-font-smoothing:antialiased;
-  }
-  a{ color:inherit; text-decoration:none; }
-  a:hover{ opacity:.75; }
-  :focus-visible{ outline:1px solid var(--paper); outline-offset:3px; }
-  /* padding は left/right のみ指定(shorthand にすると section の
-     上下 padding をタイプセレクタより高い詳細度で上書きしてしまうため) */
-  .wrap{ max-width:var(--max); margin:0 auto; padding-left:24px; padding-right:24px; }
-  .mono{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--grey); }
-
-  /* ============ header ============ */
-  header{
-    /* グレイン(2000)・再生中プレイヤー(2001)より常に手前 */
-    position:sticky; top:0; z-index:2002;
-    background:color-mix(in srgb, var(--ink) 88%, transparent);
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--line);
-  }
-  .nav{
-    display:flex; justify-content:space-between; align-items:center;
-    height:52px;
-  }
-  .nav .brand{ font-family:var(--mono); font-size:12px; letter-spacing:.22em; }
-  .nav ul{ display:flex; gap:28px; list-style:none; }
-  .nav a{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--grey); }
-  .nav a:hover{ color:var(--paper); opacity:1; }
-
-  /* ============ hero ============ */
-  /* 縦だけ longhand で指定(.wrap の左右 padding を shorthand で潰さないため) */
-  .hero{ padding-top:96px; padding-bottom:72px; }
-  /* 左右paddingなし: FLEATZ の左端を各セクションと揃える */
-  .frame{ padding:64px 0 48px; }
-  h1{
-    font-family:var(--disp); font-weight:600;
-    font-size:clamp(72px, 14vw, var(--h1-max));
-    line-height:.92; letter-spacing:.01em;
-    text-transform:uppercase;
-  }
-  .hero .sub{
-    margin-top:28px; display:flex; flex-wrap:wrap; gap:10px 32px;
-    align-items:baseline;
-  }
-  .hero .sub .role{ font-size:15px; color:var(--paper); }
-  .statusline{
-    margin-top:40px; padding-top:14px; border-top:1px solid var(--line);
-    display:flex; flex-wrap:wrap; gap:8px 28px;
-    font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--grey);
-  }
-  .dot{
-    display:inline-block; width:6px; height:6px; border-radius:50%;
-    background:var(--signal); margin-right:8px; vertical-align:1px;
-  }
-  .dot.closed{ background:var(--grey); }
-
-  /* ============ sections ============ */
-  section{ padding:72px 0; border-top:1px solid var(--line); }
-  section, footer{ scroll-margin-top:64px; }  /* スティッキーヘッダーに見出しが隠れないように */
-  .sec-head{
-    display:flex; justify-content:space-between; align-items:baseline;
-    margin-bottom:40px;
-  }
-  h2{
-    font-family:var(--disp); font-weight:400; text-transform:uppercase;
-    font-size:clamp(26px,4vw,38px); letter-spacing:.04em;
-  }
-
-  /* ============ works: 目録形式 ============ */
-  .work-group + .work-group{
-    margin-top:56px; padding-top:56px; border-top:1px solid var(--line);
-  }
-  .group-head{
-    display:flex; justify-content:space-between; align-items:baseline;
-    margin-bottom:24px;
-  }
-  .group-head h3{
-    font-family:var(--mono); font-size:13px; letter-spacing:.16em;
-    color:var(--paper);
-  }
-  .group-head .mono{ color:var(--grey); }
-  .group-empty{
-    font-family:var(--mono); font-size:12px; letter-spacing:.1em;
-    color:var(--grey); padding:4px 0 8px;
-  }
-  .work{
-    display:grid; grid-template-columns:minmax(0,420px) 1fr;
-    gap:28px; padding:28px 0; border-top:1px solid var(--line);
-    align-items:start;
-  }
-  .work:first-of-type{ border-top:0; padding-top:0; }
-  .player{
-    position:relative; aspect-ratio:16/9; background:var(--ink-2);
-    overflow:hidden;
-  }
-  .player img{
-    width:100%; height:100%; object-fit:cover; display:block;
-    filter:grayscale(1) contrast(1.05);
-    transition:filter .35s ease;
-  }
-  /* ロゴ等の静止画はトリミングせず全体を見せる(letterbox は --ink-2 で埋まる) */
-  .player.image img{ object-fit:contain; }
-  .player button, .player .img-link{
-    position:absolute; inset:0; width:100%; height:100%;
-    display:block; background:transparent; border:0; cursor:pointer;
-  }
-  .player button::after, .player .img-link::after{
-    content:attr(data-label); position:absolute; right:10px; bottom:8px;
-    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
-    color:var(--paper); background:rgba(11,11,12,.72); padding:4px 8px;
-  }
-  .player:hover img{ filter:grayscale(0); }
-  .player iframe{ width:100%; height:100%; border:0; display:block; }
-  .player.empty{
-    display:flex; align-items:center; justify-content:center;
-    border:1px dashed var(--line);
-  }
-  .meta h3{
-    font-family:var(--body); font-weight:500; font-size:17px;
-    margin:0 0 10px; line-height:1.6;
-  }
-  .meta .work-note{ margin-top:12px; font-size:13px; line-height:1.85; color:var(--grey); max-width:36em; }
-
-  /* ============ lightbox: 静止画をタブ内で拡大 ============ */
-  /* z-index=2500: グレイン/ヘッダーより手前、プリローダー(3000)より奥 */
-  .lightbox{
-    position:fixed; inset:0; z-index:2500;
-    display:flex; align-items:center; justify-content:center;
-    padding-top:24px; padding-bottom:24px; padding-left:24px; padding-right:24px;
-    background:color-mix(in srgb, var(--ink) 94%, transparent);
-    visibility:hidden; opacity:0;   /* 既定は非表示。JSが .open を付けて開く */
-  }
-  .lightbox.open{ visibility:visible; opacity:1; }
-  .lightbox img{ max-width:90vw; max-height:85vh; object-fit:contain; display:block; }
-  .lb-close{
-    position:absolute; top:16px; right:16px;
-    font-family:var(--mono); font-size:10px; letter-spacing:.18em;
-    color:var(--paper); background:rgba(11,11,12,.72);
-    border:0; padding-top:6px; padding-bottom:6px; padding-left:10px; padding-right:10px;
-    cursor:pointer;
-  }
-  .lb-close:hover, .lb-close:focus-visible{ background:var(--paper); color:var(--ink); }
-
-  /* ============ about / commission ============ */
-  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:56px; }
-  .about p{ color:var(--paper); max-width:34em; }
-  .about p + p{ margin-top:12px; }
-  .list{ list-style:none; }
-  .list li{
-    padding:10px 0; border-bottom:1px solid var(--line);
-  }
-  .note{ margin-top:18px; color:var(--grey); font-size:13.5px; }
-
-  /* ============ footer ============ */
-  footer{ border-top:1px solid var(--line); padding:48px 0 64px; }
-  .links{ display:flex; flex-wrap:wrap; gap:12px 36px; margin-top:8px; }
-  .links a{ font-family:var(--mono); font-size:12px; letter-spacing:.14em; }
-  .copy{ margin-top:36px; }
-
-  /* ============ motion ============ */
-  /* フィルムグレイン(素材感の統一。再生中の動画には掛からない) */
-  body::after{
-    content:""; position:fixed; inset:-120px; z-index:2000; pointer-events:none;
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") repeat;
-    opacity:var(--grain);
-  }
-  .player.playing{ z-index:2001; }  /* 再生中はグレインより手前に出す */
-
-  .player:hover button::after, .player:hover .img-link::after,
-  .player button:focus-visible::after, .player .img-link:focus-visible::after{
-    background:var(--paper); color:var(--ink);
-  }
-
-  /* 動きの定義はすべてここに集約(reduced-motion 環境では一切動かない) */
-  @media (prefers-reduced-motion: no-preference){
-    /* --- 起動シーケンス: 文字 → ステータス点灯 --- */
-    h1 .ch{
-      display:inline-block; white-space:pre; opacity:0; transform:translateY(.38em);
-      transition:opacity var(--logo-duration) var(--ease), transform var(--logo-duration) var(--ease);
-      transition-delay:calc(var(--logo-delay) + var(--i, 0) * var(--logo-stagger));
-    }
-    body.is-ready h1 .ch{ opacity:1; transform:none; }
-    .hero .sub{ opacity:0; transform:translateY(10px);
-      transition:opacity .45s var(--ease) .3s, transform .45s var(--ease) .3s; }
-    .hero .statusline{ opacity:0; transition:opacity .5s var(--ease) .4s; }
-    body.is-ready .hero .sub{ opacity:1; transform:none; }
-    body.is-ready .hero .statusline{ opacity:1; }
-
-    /* --- ローディング(要素は motionOK 時のみ JS が生成) --- */
-    .preloader{
-      position:fixed; inset:0; z-index:3000; background:var(--ink);
-      display:flex; flex-direction:column; gap:16px;
-      align-items:center; justify-content:center;
-      transition:opacity .35s var(--ease);
-    }
-    .preloader .bar{
-      width:120px; height:1px; background:var(--line);
-      position:relative; overflow:hidden;
-    }
-    .preloader .bar::after{
-      content:""; position:absolute; inset:0; background:var(--paper);
-      transform:scaleX(0); transform-origin:left;
-      animation:load-fill .6s var(--ease) forwards;
-    }
-    @keyframes load-fill{ to{ transform:scaleX(1); } }
-
-    /* --- スクロールで現れる(クラスはJSが付与。JSなしなら常に表示) --- */
-    .reveal{ opacity:0; transform:translateY(18px);
-      transition:opacity .6s var(--ease), transform .6s var(--ease); }
-    .reveal.in{ opacity:1; transform:none; }
-
-    /* --- こまかい所作 --- */
-    .player img{ transition:filter .35s ease, transform .9s var(--ease); }
-    .player:hover img{ transform:scale(1.03); }
-    .player button::after, .player .img-link::after{ transition:background .25s ease, color .25s ease; }
-    /* ライトボックス: フェード + わずかな拡大(.98→1)。閉じる間は表示を保つ */
-    .lightbox{ transition:opacity .3s var(--ease), visibility 0s linear .3s; }
-    .lightbox.open{ transition:opacity .3s var(--ease), visibility 0s; }
-    .lightbox img{ transform:scale(.98); transition:transform .3s var(--ease); }
-    .lightbox.open img{ transform:none; }
-    .player iframe{ animation:fade-in .45s var(--ease); }
-    body::after{ animation:grain .9s steps(1) infinite; }
-    @keyframes fade-in{ from{ opacity:0; } }
-    @keyframes grain{
-      0%,100%{ transform:translate(0,0); }
-      12%{ transform:translate(-30px,18px); }
-      25%{ transform:translate(22px,-26px); }
-      37%{ transform:translate(-14px,-30px); }
-      50%{ transform:translate(28px,24px); }
-      62%{ transform:translate(-26px,-8px); }
-      75%{ transform:translate(12px,30px); }
-      87%{ transform:translate(-18px,6px); }
-    }
-  }
-
-  @media (max-width:760px){
-    .work{ grid-template-columns:1fr; gap:16px; }
-    .cols{ grid-template-columns:1fr; gap:48px; }
-    .frame{ padding:48px 0 40px; }
-    .hero{ padding-top:64px; padding-bottom:48px; }
-  }
-  @media (max-width:430px){
-    .nav ul{ gap:14px; }  /* 幅360px級の端末でナビがはみ出さないように */
-  }
-  @media (prefers-reduced-motion:reduce){
-    html{ scroll-behavior:auto; }
-    .player img{ transition:none; }
-  }
+/* DESIGN TOKENS — フォント・文字サイズ・余白の調整はここ。
+   フォントは仮設定。Adobe FontsのWebプロジェクトに追加した名前を対応させる。 */
+:root {
+  --ink:#080808; --ink-2:#101010; --paper:#f2f2f2; --grey:#888; --line:#242424;
+  --disp:"din-2014","dnp-shuei-gothic-gin-std",sans-serif;
+  --body:"din-2014","dnp-shuei-gothic-gin-std",sans-serif;
+  --nav-font:var(--body);
+  --heading:64px; --heading-mobile:44px; --body-size:15px; --body-leading:1.65;
+  --category-heading:32px; --category-heading-gap:40px; --category-gap:64px;
+  --card-title:18px; --caption:13px; --detail-title:28px;
+  --max:1200px; --gutter:40px; --mobile-gutter:20px; --nav-gutter:48px;
+  --nav-height:88px; --card-gap:48px;
+  --card-width:576px; --card-mobile:330px; --peek:24px;
+  --about-logo-width:42px; --about-logo-height:38px; --about-name-gap:16px;
+  --view-all-width:117px; --view-all-height:41px; --view-all-font:14px; --view-all-row:60px;
+  --view-all-duration:250ms; --link-hover-duration:250ms;
+  --detail-heading-height:100px; --detail-heading-padding:12px;
+  --scroll-button-size:36px; --scroll-button-gap:8px; --scroll-chevron-size:12px;
+  --frame-line-width:1px; --frame-line-color:#fff; --frame-inset-left:2.291667%; --frame-inset-right:2.291667%;
+  --scroll-button-inset:12px; --carousel-bg:#242424; --carousel-padding:34px; --carousel-caption-padding:12px; --scrollbar-height:2px;
+  --close-width:117px; --close-height:33px; --close-icon-size:10px;
+  --menu-open-duration:600ms; --menu-close-duration:500ms;
+  --hover-scale:1.03; --hover-duration:.9s; --ease:cubic-bezier(.22,1,.36,1);
+}
+* { box-sizing:border-box; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0; padding-top:0; padding-right:0; padding-bottom:0; padding-left:0; }
+body { background:var(--ink); color:var(--paper); font-family:var(--body); font-size:var(--body-size); line-height:var(--body-leading); -webkit-font-smoothing:antialiased; }
+a { color:inherit; text-decoration:none; } button { font:inherit; color:inherit; cursor:pointer; } img { display:block; max-width:100%; }
+:focus-visible { outline:2px solid var(--paper); outline-offset:5px; }
+a:hover { color:var(--paper); } [hidden] { display:none!important; }
+.wrap { width:calc(100% - var(--gutter) * 2); max-width:var(--max); margin-left:auto; margin-right:auto; }
+h1,h2 { font-family:var(--disp); font-size:var(--heading); font-weight:500; line-height:1.1; overflow-wrap:anywhere; }
+h3 { font-weight:500; } p { overflow-wrap:anywhere; }
+.site-header {
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:var(--nav-height);
+  background:var(--ink);
+}
+.nav { height:100%; display:flex; align-items:center; justify-content:space-between; padding-left:var(--nav-gutter); padding-right:var(--nav-gutter); }
+.brand { display:flex; align-items:center; justify-content:center; width:56px; height:48px; }
+.brand img { width:42px; height:38px; object-fit:contain; }
+.desktop-nav { display:flex; gap:32px; font-family:var(--nav-font); font-size:14px; color:var(--grey); }
+.desktop-nav a { display:flex; align-items:center; min-height:44px; }
+a[aria-current=page] { color:var(--paper); }
+.menu-toggle { position:relative; display:none; width:44px; height:44px; border:0; background:transparent; align-items:center; justify-content:center; }
+.menu-toggle img,.menu-toggle svg { width:23px; height:20px; object-fit:contain; }
+.menu-toggle[aria-expanded="true"] svg { visibility:hidden; }
+.showreel { padding-top:64px; padding-bottom:64px; }
+/* 境界線は各セクションの下側だけ。縦線はページ全体で一度だけ描く。 */
+.home-page,.framed-page { position:relative; isolation:isolate; }
+.home-page::before,.framed-page::before { content:""; position:absolute; inset:0; pointer-events:none; z-index:1; background:linear-gradient(var(--frame-line-color),var(--frame-line-color)) var(--frame-inset-left) 0 / var(--frame-line-width) 100% no-repeat,linear-gradient(var(--frame-line-color),var(--frame-line-color)) calc(100% - var(--frame-inset-right)) 0 / var(--frame-line-width) 100% no-repeat; }
+.home-page > section,.framed-page > .list-page,.detail-page > article > * { position:relative; }
+.home-page > section::after,.framed-page > .list-page::after,.detail-page > article > *::after { content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100vw; height:var(--frame-line-width); background:var(--frame-line-color); pointer-events:none; }
+.home-page::after,.framed-page::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(var(--frame-line-color),var(--frame-line-color)) left top / var(--frame-line-width) 100% no-repeat,linear-gradient(var(--frame-line-color),var(--frame-line-color)) right top / var(--frame-line-width) 100% no-repeat; }
+.site-header::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(var(--frame-line-color),var(--frame-line-color)) top / 100% var(--frame-line-width) no-repeat,linear-gradient(var(--frame-line-color),var(--frame-line-color)) bottom / 100% var(--frame-line-width) no-repeat,linear-gradient(var(--frame-line-color),var(--frame-line-color)) left / var(--frame-line-width) 100% no-repeat,linear-gradient(var(--frame-line-color),var(--frame-line-color)) right / var(--frame-line-width) 100% no-repeat; }
+.hero { line-height:0; }
+.hero picture,.hero img { display:block; width:100%; }
+.hero img { height:auto; }
+.showreel-status { font-size:15px; line-height:1.4; margin-top:32px; }
+.home-works { padding-top:40px; padding-bottom:96px; }
+.home-works h2 { margin-bottom:0; }
+.works-actions { min-height:var(--view-all-row); display:flex; align-items:center; }
+.works-carousel { position:relative; z-index:2; margin-top:22px; background:var(--carousel-bg); padding-top:var(--carousel-padding); padding-bottom:var(--carousel-padding); }
+.scroll-controls { position:absolute; top:50%; transform:translateY(-50%); left:var(--scroll-button-inset); right:var(--scroll-button-inset); z-index:3; display:flex; justify-content:space-between; pointer-events:none; }
+.scroll-controls button { width:var(--scroll-button-size); height:var(--scroll-button-size); display:grid; place-items:center; border:1px solid transparent; background:var(--carousel-bg); color:var(--paper); pointer-events:auto; }
+.scroll-controls button:hover:not(:disabled) { background:var(--paper); color:var(--ink); }
+.scroll-controls button::before { content:""; width:var(--scroll-chevron-size); height:var(--scroll-chevron-size); border-top:1px solid currentColor; border-right:1px solid currentColor; transform:rotate(45deg); }
+.scroll-controls #worksPrev::before { transform:rotate(-135deg); }
+.scroll-controls button:disabled { opacity:.3; cursor:default; }
+.commission-links { display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; }
+.view-all { position:relative; display:inline-flex; align-items:center; justify-content:center; width:var(--view-all-width); height:var(--view-all-height); background:var(--ink); color:var(--paper); font-size:var(--view-all-font); line-height:1.2; padding-left:20px; padding-right:20px; padding-top:12px; padding-bottom:12px; border:0; }
+.view-all::after { content:""; position:absolute; inset:0; border:1px solid var(--paper); pointer-events:none; }
+.view-all:hover { background:var(--paper); color:var(--ink); }
+.view-all:hover::after { border-color:transparent; }
+.works-scroll { overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; scrollbar-width:none; padding-top:0; padding-bottom:0; padding-left:max(var(--gutter),calc((100vw - var(--max)) / 2)); padding-right:max(var(--gutter),calc((100vw - var(--max)) / 2)); scroll-padding-left:max(var(--gutter),calc((100vw - var(--max)) / 2)); }
+.works-scroll::-webkit-scrollbar { display:none; }
+.works-scrollbar { position:relative; z-index:2; display:block; width:calc(100% - var(--gutter) * 2); max-width:var(--max); height:24px; margin-left:auto; margin-right:auto; margin-top:12px; appearance:none; background:transparent; cursor:pointer; --scroll-thumb-width:60px; }
+.works-scrollbar::-webkit-slider-runnable-track { height:var(--scrollbar-height); background:var(--grey); }
+.works-scrollbar::-webkit-slider-thumb { appearance:none; width:var(--scroll-thumb-width); height:var(--scrollbar-height); background:var(--paper); }
+.works-scrollbar::-moz-range-track { height:var(--scrollbar-height); background:var(--grey); }
+.works-scrollbar::-moz-range-thumb { width:var(--scroll-thumb-width); height:var(--scrollbar-height); border:0; border-radius:0; background:var(--paper); }
+.works-scrollbar:disabled { opacity:.3; cursor:default; }
+.works-track .work-card h3 { padding-left:var(--carousel-caption-padding); padding-right:var(--carousel-caption-padding); padding-top:var(--carousel-caption-padding); }
+.works-track .work-year { padding-left:var(--carousel-caption-padding); padding-right:var(--carousel-caption-padding); padding-bottom:var(--carousel-caption-padding); }
+.works-track { display:flex; align-items:flex-start; gap:var(--card-gap); width:max-content; }
+.work-card { display:block; min-width:0; scroll-snap-align:start; }
+.works-track .work-card { position:relative; z-index:2; background:var(--ink); width:min(var(--card-width),calc((100vw - var(--gutter) * 2 - var(--card-gap) - var(--peek)) / 2)); flex-shrink:0; }
+.card-media,.media { aspect-ratio:16/9; background:var(--ink-2); border:1px solid var(--line); overflow:hidden; position:relative; }
+.card-media .media-thumb,.media .media-thumb { width:100%; height:100%; object-fit:cover; }
+.card-media.still .media-thumb,.media.still .media-thumb { object-fit:contain; }
+.work-card h3 { font-size:var(--card-title); line-height:1.4; margin-top:16px; overflow-wrap:anywhere; }
+.work-year { color:var(--grey); font-size:var(--caption); margin-top:8px; }
+.empty-media { height:100%; display:flex; align-items:center; justify-content:center; color:var(--grey); font-size:var(--caption); }
+.about { padding-top:64px; padding-bottom:96px; }
+.about h2 { margin-bottom:40px; }.about h3 { font-size:24px; }
+.about-identity { display:flex; align-items:center; gap:var(--about-name-gap); margin-bottom:32px; }
+.about-identity img { width:var(--about-logo-width); height:var(--about-logo-height); object-fit:contain; flex-shrink:0; }
+.prose p + p { margin-top:20px; }.prose { line-height:var(--body-leading); }
+.commissions { padding-top:72px; padding-bottom:80px; }.commissions h2 { margin-bottom:12px; }
+.commission-status { font-size:20px; line-height:1.3; }.commission-details { margin-top:40px; }
+.commission-details ul { list-style:none; }.commission-details p { margin-top:20px; }
+.site-footer { padding-top:64px; padding-bottom:32px; color:var(--grey); }
+.footer-links { display:flex; flex-wrap:wrap; gap:24px; font-size:var(--caption); }
+.footer-links a { display:flex; align-items:center; min-height:44px; }.copyright { font-size:12px; margin-top:12px; }
+.list-page { padding-top:40px; padding-bottom:64px; }.list-page h1 { margin-bottom:96px; }
+.work-category + .work-category { margin-top:var(--category-gap); }
+.work-category h2 { font-size:var(--category-heading); margin-bottom:var(--category-heading-gap); }
+.work-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:var(--card-gap); row-gap:112px; }
+.detail-heading { min-height:var(--detail-heading-height); display:flex; flex-direction:column; justify-content:center; padding-top:var(--detail-heading-padding); padding-bottom:var(--detail-heading-padding); }
+.detail-heading h1 { font-size:var(--detail-title); line-height:1.4; }.detail-heading .work-year { margin-top:16px; }
+.detail-media { padding-top:52px; padding-bottom:52px; }.media iframe { display:block; width:100%; height:100%; border:0; }
+.media-action { display:block; position:absolute; inset:0; width:100%; height:100%; border:0; background:transparent; }
+.media-label { position:absolute; bottom:12px; right:12px; }
+.media-play-label,.media-view-label { display:inline-flex; align-items:center; justify-content:center; gap:8px; background:var(--ink); color:var(--paper); font-family:var(--body); font-size:var(--view-all-font); font-weight:500; line-height:1; white-space:nowrap; padding-left:20px; padding-right:20px; border:1px solid var(--paper); }
+.media-play-label { width:117px; height:40px; padding-top:12px; padding-bottom:12px; }
+.media-view-label { width:117px; height:36px; padding-top:11px; padding-bottom:11px; }
+.media-play-icon { position:relative; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; flex:0 0 16px; }
+.media-play-icon img { position:absolute; left:50%; top:50%; width:13.8564px; height:12px; object-fit:fill; transform:translate(-50%,-50%) rotate(90deg); }
+.media-play-icon-dark,.media-view-icon-dark { opacity:0; }
+.media-view-icon { position:relative; display:inline-flex; align-items:center; justify-content:center; width:13px; height:12px; flex:0 0 13px; }
+.media-view-icon img { position:absolute; left:-.75px; top:-.75px; width:14.5px; height:13.5px; max-width:none; }
+.media-view-icon-light { opacity:1; }
+.media-action:hover .media-play-label,.media-action:focus-visible .media-play-label,.media-action:hover .media-view-label,.media-action:focus-visible .media-view-label { background:var(--paper); color:var(--ink); border-color:transparent; }
+.media-action:hover .media-play-icon-dark,.media-action:focus-visible .media-play-icon-dark,.media-action:hover .media-view-icon-dark,.media-action:focus-visible .media-view-icon-dark { opacity:1; }
+.media-action:hover .media-play-icon-light,.media-action:focus-visible .media-play-icon-light,.media-action:hover .media-view-icon-light,.media-action:focus-visible .media-view-icon-light { opacity:0; }
+.overview { padding-top:64px; padding-bottom:64px; }.gallery { display:grid; gap:32px; padding-top:32px; padding-bottom:64px; }
+dialog { border:0; max-width:none; max-height:none; color:var(--paper); background:var(--ink); }
+dialog::backdrop { background:rgba(8,8,8,.96); }
+.mobile-menu { width:100%; height:100dvh; position:fixed; inset:0; opacity:0; }
+.mobile-menu::backdrop { background:transparent; }
+.mobile-menu.is-visible { opacity:1; }
+/* Figmaから取得したSVGの線そのものを変形。パスの形状は保持する。 */
+.menu-line { transform-box:view-box; }
+.menu-line-top { transform-origin:11.375px 1px; }
+.menu-line-bottom { transform-origin:11.375px 17px; }
+.is-visible .menu-line-top { transform:translateY(8px) rotate(45deg); }
+.is-visible .menu-line-middle { opacity:0; }
+.is-visible .menu-line-bottom { transform:translateY(-8px) rotate(-45deg); }
+.menu-header { height:72px; display:flex; align-items:center; justify-content:space-between; padding-left:32px; padding-right:24px; }
+.menu-body { min-height:calc(100dvh - 72px); display:flex; flex-direction:column; }
+.menu-links { margin-top:6px; margin-left:42px; margin-right:42px; font-size:30px; }
+.menu-links a { display:block; border-top:1px solid var(--grey); padding-top:12px; padding-bottom:12px; padding-left:4px; }
+.menu-links a:last-child { border-bottom:1px solid var(--grey); }
+.menu-footer { margin-top:auto; padding-top:32px; padding-bottom:32px; padding-left:20px; padding-right:20px; color:var(--grey); }
+.lightbox { position:fixed; inset:0; width:100%; height:100dvh; background:transparent; }
+.lightbox[open] { display:flex; align-items:center; justify-content:center; }.lightbox img { max-width:90vw; max-height:85dvh; object-fit:contain; }
+.lb-close { position:absolute; top:16px; right:16px; width:var(--close-width); height:var(--close-height); display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--paper); background:var(--ink); color:var(--paper); font-size:var(--view-all-font); line-height:1; }
+.lb-close-icon { position:relative; width:var(--close-icon-size); height:var(--close-icon-size); }
+.lb-close .lb-close-icon img { position:absolute; inset:0; width:100%; height:100%; }
+.lb-close-dark { opacity:0; }
+.lb-close:hover,.lb-close:focus-visible { background:var(--paper); color:var(--ink); }
+.lb-close:hover .lb-close-dark,.lb-close:focus-visible .lb-close-dark { opacity:1; }
+.lb-close:hover .lb-close-light,.lb-close:focus-visible .lb-close-light { opacity:0; }
+@media (prefers-reduced-motion:no-preference) {
+  .mobile-menu { transition:opacity var(--menu-close-duration) var(--ease); }
+  .menu-line { transition:transform var(--menu-close-duration) var(--ease),opacity var(--menu-close-duration) var(--ease); }
+  .mobile-menu.is-visible,.mobile-menu.is-visible .menu-line { transition-duration:var(--menu-open-duration); }
+  .view-all,.view-all::after { transition:background-color var(--view-all-duration) var(--ease),color var(--view-all-duration) var(--ease),border-color var(--view-all-duration) var(--ease); }
+  .lb-close,.lb-close-icon img { transition:background-color var(--view-all-duration) var(--ease),color var(--view-all-duration) var(--ease),opacity var(--view-all-duration) var(--ease); }
+  .desktop-nav a,.menu-links a,.footer-links a,.scroll-controls button { transition:color var(--link-hover-duration) var(--ease); }
+  .card-media .media-thumb,.media .media-thumb { transition:transform var(--hover-duration) var(--ease); }
+  .media-play-label,.media-play-icon img,.media-view-label,.media-view-icon img { transition:background-color var(--view-all-duration) var(--ease),color var(--view-all-duration) var(--ease),border-color var(--view-all-duration) var(--ease),opacity var(--view-all-duration) var(--ease); }
+  .work-card:hover .media-thumb,.work-card:focus-visible .media-thumb,.media:hover .media-thumb { transform:scale(var(--hover-scale)); }
+}
+@media (max-width:760px) {
+  :root { --gutter:var(--mobile-gutter); --heading:var(--heading-mobile); --nav-height:72px; --card-gap:16px; --carousel-padding:24px; --scroll-button-inset:4px; --frame-line-width:.5px; --frame-inset-left:2.820513%; --frame-inset-right:3.333333%; }
+  .nav { padding-left:32px; padding-right:24px; }.brand { width:44px; height:44px; }.brand img { width:28px; height:26px; }
+  .desktop-nav { display:none; }.menu-toggle { display:flex; }
+  .showreel { padding-top:48px; padding-bottom:48px; }.showreel-status { font-size:15px; margin-top:24px; }
+  .home-works { padding-top:48px; padding-bottom:64px; }.home-works h2 { margin-bottom:0; }
+  .works-track .work-card { position:relative; z-index:2; background:var(--ink); width:min(var(--card-mobile),calc(100vw - var(--gutter) - var(--card-gap) - var(--peek))); }
+  .about { padding-top:48px; padding-bottom:64px; }.about h2 { margin-bottom:32px; }.about h3 { font-size:20px; }.about-identity { margin-bottom:24px; }
+  .commissions { padding-top:56px; padding-bottom:64px; }.commission-status { font-size:18px; }.commission-details { margin-top:32px; }
+  .site-footer { padding-top:32px; }.work-grid { grid-template-columns:1fr; row-gap:48px; }
+  .list-page { padding-top:48px; }.list-page h1 { margin-bottom:48px; }
+  .detail-media { padding-top:40px; padding-bottom:40px; }
+}
 </style>
 </head>
 <body>
-
-<header>
-  <nav class="nav wrap" aria-label="メイン">
-    <a class="brand" href="#top">FLEATZ</a>
-    <ul>
-      <li><a href="#about">ABOUT</a></li>
-      <li><a href="#works">WORKS</a></li>
-      <li><a href="#commission">COMMISSION</a></li>
-      <li><a href="#contact">CONTACT</a></li>
-    </ul>
-  </nav>
-</header>
-
-<main id="top">
-  <div class="hero wrap">
-    <div class="frame">
-      <h1 id="siteName">Fleatz</h1>
-      <div class="sub">
-        <span class="role" id="siteRole"></span>
-        <span class="mono" id="siteTools"></span>
-      </div>
-      <div class="statusline">
-        <span id="statusCommission"></span>
-        <span id="statusCount"></span>
-      </div>
-    </div>
-  </div>
-
-  <section id="about" class="wrap">
-    <div class="sec-head"><h2>About</h2></div>
-    <div class="about" id="bio"></div>
-  </section>
-
-  <section id="works" class="wrap">
-    <div class="sec-head">
-      <h2>Works</h2>
-    </div>
-    <div id="workList"></div>
-  </section>
-
-  <section id="commission" class="wrap">
-    <div class="sec-head">
-      <h2>Commission</h2>
-      <span class="mono" id="commissionBadge"></span>
-    </div>
-    <div class="cols">
-      <ul class="list" id="acceptList"></ul>
-      <p class="note" id="commissionNote"></p>
-    </div>
-  </section>
-</main>
-
-<footer id="contact">
-  <div class="wrap">
-    <span class="mono">CONTACT</span>
-    <div class="links" id="linkList"></div>
-    <p class="copy mono">© <span id="year"></span> FLEATZ</p>
-  </div>
-</footer>
-
+<header class="site-header"><nav class="nav" aria-label="メイン"><a class="brand" href="?" aria-label="Home"><img src="images/ui/logo.png" width="42" height="38" alt=""></a><div class="desktop-nav"><a href="?" data-page="home">Home</a><a href="?page=works" data-page="works">Works</a></div><button class="menu-toggle" id="menuOpen" aria-label="メニューを開く" aria-haspopup="dialog" aria-controls="mobileMenu" aria-expanded="false"><svg class="menu-symbol" aria-hidden="true" focusable="false" preserveAspectRatio="none" overflow="visible" style="display: block;" width="22.75" height="18" viewBox="0 0 22.75 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g>
+<path class="menu-line menu-line-top" d="M1 1H21.75" stroke="white" stroke-width="2" stroke-linecap="round"/>
+<path class="menu-line menu-line-middle" d="M1 9H21.75" stroke="white" stroke-width="2" stroke-linecap="round"/>
+<path class="menu-line menu-line-bottom" d="M1 17H21.75" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</g>
+</svg></button></nav></header>
+<main id="main"></main>
+<footer class="site-footer"><div class="wrap" id="footerContent"></div></footer>
+<dialog class="mobile-menu" id="mobileMenu" aria-label="メインメニュー"><div class="menu-header"><a class="brand" href="?" aria-label="Home"><img src="images/ui/logo.png" alt="" width="28" height="26"></a><button class="menu-toggle" id="menuClose" aria-label="メニューを閉じる"><svg class="menu-symbol" aria-hidden="true" focusable="false" preserveAspectRatio="none" overflow="visible" style="display: block;" width="22.75" height="18" viewBox="0 0 22.75 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g>
+<path class="menu-line menu-line-top" d="M1 1H21.75" stroke="white" stroke-width="2" stroke-linecap="round"/>
+<path class="menu-line menu-line-middle" d="M1 9H21.75" stroke="white" stroke-width="2" stroke-linecap="round"/>
+<path class="menu-line menu-line-bottom" d="M1 17H21.75" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</g>
+</svg></button></div><div class="menu-body"><nav class="menu-links" aria-label="モバイル"><a href="?" data-page="home">Home</a><a href="?page=works" data-page="works">Works</a></nav><div class="menu-footer" id="menuFooter"></div></div></dialog>
+<dialog class="lightbox" id="lightbox" aria-label="作品の拡大表示"><button class="lb-close" id="lbClose" aria-label="拡大表示を閉じる"><span class="lb-close-icon" aria-hidden="true"><img class="lb-close-light" src="images/ui/lightbox-close-light.svg" alt="" width="10" height="10"><img class="lb-close-dark" src="images/ui/lightbox-close-dark.svg" alt="" width="10" height="10"></span><span>Close</span></button><img id="lbImage" alt=""></dialog>
+<noscript>作品の表示にはJavaScriptを有効にしてください。</noscript>
 <script src="works.js"></script>
 <script>
-/* works.js の内容を流し込むだけの描画コード。通常ここは編集不要 */
-(function(){
-  const $ = (id) => document.getElementById(id);
-
-  /* --- プロフィール --- */
-  $("siteRole").textContent  = PROFILE.role;
-  $("siteTools").textContent = PROFILE.tools.toUpperCase();
-  const open = PROFILE.commissionsOpen;
-  $("statusCommission").innerHTML =
-    `<span class="dot${open ? "" : " closed"}"></span>COMMISSIONS: ${open ? "OPEN" : "CLOSED"}`;
-  //$("commissionBadge").textContent = open ? "STATUS: OPEN" : "STATUS: CLOSED";
-  $("year").textContent = new Date().getFullYear();
-
-  /* --- 自己紹介 --- */
-  $("bio").innerHTML = PROFILE.bio.map(p => `<p>${p}</p>`).join("");
-
-  /* --- 依頼 --- */
-  $("acceptList").innerHTML = PROFILE.commission.accepts
-    .map(a => `<li>${a}</li>`).join("");
-  $("commissionNote").textContent = PROFILE.commission.note;
-
-  /* --- リンク(URL未記入の行は自動で隠す。素のメールアドレスは mailto: を補う) --- */
-  $("linkList").innerHTML = PROFILE.links
-    .filter(l => l.url)
-    .map(l => {
-      // http(s):/mailto: で始まる場合はそのまま。それ以外で "@" を含むものだけ
-      // 素のメールアドレスとみなす(YouTubeの @ハンドル等をURLごと誤爆させないため)
-      const isSchemed = /^(https?:|mailto:)/i.test(l.url);
-      const href = (!isSchemed && l.url.includes("@")) ? `mailto:${l.url}` : l.url;
-      /* mailto に target=_blank を付けると空タブが開くブラウザがあるため外部URLのみ */
-      const ext = href.startsWith("mailto:") ? "" : ` target="_blank" rel="noopener"`;
-      return `<a href="${href}"${ext}>${l.label} ↗</a>`;
-    })
-    .join("");
-
-  /* --- 作品一覧(カテゴリごとにグループ化) --- */
-  const pad = n => String(n).padStart(2, "0");
-  const renderWork = (w) => {
-    /* サムネイルは高解像度(maxres)を優先し、用意がない動画は hq に自動で切り替える */
-    const hq = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-    const fallback = (id) =>
-      `if(!this.dataset.f){this.dataset.f=1;this.src='${hq(id)}'}`;
-    const player = w.youtubeId
-      ? `<div class="player">
-           <img src="https://i.ytimg.com/vi/${w.youtubeId}/maxresdefault.jpg" alt="" loading="lazy"
-                onerror="${fallback(w.youtubeId)}"
-                onload="if(this.naturalWidth<320){${fallback(w.youtubeId)}}">
-           <button aria-label="${w.title} を再生" data-id="${w.youtubeId}" data-label="▶ PLAY"></button>
-         </div>`
-      : w.image
-      ? `<div class="player image">
-           <img src="${w.image}" alt="" loading="lazy">
-           <a class="img-link" href="${w.image}" target="_blank" rel="noopener"
-              aria-label="${w.title} を拡大表示" data-label="VIEW ⤢"></a>
-         </div>`
-      : `<div class="player empty"><span class="mono">COMING SOON</span></div>`;
-    return `
-      <article class="work">
-        ${player}
-        <div class="meta">
-          <h3>${w.title}</h3>
-          ${w.note ? `<p class="work-note">${w.note}</p>` : ""}
-        </div>
-      </article>`;
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const url = value => { const s=String(value || ''); return /^(https?:|mailto:)/i.test(s) || (!/^[a-z][a-z\d+.-]*:/i.test(s) && !s.startsWith('//')) ? s : ''; };
+  const href = value => {const s=String(value||'');return url(!/^(https?:|mailto:)/i.test(s)&&s.includes('@') ? `mailto:${s}`:s);};
+  const links = () => PROFILE.links.filter(l=>l.url).map(l=>`<a href="${esc(href(l.url))}"${/^https?:/i.test(href(l.url))?' target="_blank" rel="noopener"':''}>${esc(l.label)}</a>`).join('');
+  const footer = () => `<div class="footer-links">${links()}</div><p class="copyright">© ${esc(PROFILE.name.toLowerCase())}</p>`;
+  $('footerContent').innerHTML=footer(); $('menuFooter').innerHTML=footer();
+  // idは並べ替えても変わらないURL用の識別子。既存データは動画ID/画像パスでも動く。
+  // 元データは変更せず、年の新しい順に表示。同年は記入順、年未記入は末尾。
+  const workYear = w => /^\d{4}$/.test(String(w.year ?? '').trim()) ? Number(w.year) : -Infinity;
+  const sortedWorks = WORKS.map((work,index) => ({work,index})).sort((a,b) => {
+    const ay=workYear(a.work), by=workYear(b.work);
+    return ay===by ? a.index-b.index : (ay>by ? -1 : 1);
+  }).map(entry => entry.work);
+  const key = w => w.id || w.youtubeId || w.image || w.title;
+  const workURL = w => `?work=${encodeURIComponent(key(w))}`;
+  const thumbnail = (w,lazy=true) => {
+    const src=w.youtubeId?`https://i.ytimg.com/vi/${encodeURIComponent(w.youtubeId)}/maxresdefault.jpg`:url(w.image);
+    return src?`<img class="media-thumb" src="${esc(src)}" alt="" ${lazy?'loading="lazy"':''} ${w.youtubeId?`data-youtube="${esc(w.youtubeId)}"`:''}>`:'<span class="empty-media">COMING SOON</span>';
   };
-  $("workList").innerHTML = WORK_CATEGORIES.map(cat => {
-    const items = WORKS.filter(w => w.category === cat);
-    const cards = items.map(w => renderWork(w)).join("");
-    return `
-      <div class="work-group">
-        <div class="group-head"><h3>${cat}</h3></div>
-        ${items.length ? cards : `<p class="group-empty">COMING SOON</p>`}
-      </div>`;
-  }).join("");
-  $("statusCount").textContent = `WORKS: ${pad(WORKS.length)}`;
-
-  /* クリックで初めてYouTubeを読み込む(表示が軽くなる) */
-  document.querySelectorAll(".player button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
-      const player = btn.parentElement;
-      player.classList.add("playing");
-      player.innerHTML =
-        `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1"
-          title="${btn.getAttribute("aria-label")}" allow="autoplay; encrypted-media; picture-in-picture"
-          allowfullscreen></iframe>`;
-    });
-  });
-
-  /* --- 静止画のライトボックス(クリックでタブ内に拡大表示)---
-     .img-link の href は JS 無効時のフォールバックとして残してある */
-  const lb = document.createElement("div");
-  lb.className = "lightbox";
-  lb.setAttribute("role", "dialog");
-  lb.setAttribute("aria-modal", "true");
-  lb.setAttribute("aria-label", "作品の拡大表示");
-  lb.innerHTML =
-    '<button class="lb-close" type="button" aria-label="閉じる">CLOSE ✕</button>' +
-    '<img alt="">';
-  document.body.appendChild(lb);
-  const lbImg = lb.querySelector("img");
-  const lbClose = lb.querySelector(".lb-close");
-  let lbOpener = null;   /* 開く前にフォーカスしていた要素(閉じたら戻す) */
-
-  const openLightbox = (link) => {
-    lbOpener = link;
-    lbImg.src = link.getAttribute("href");   /* 一覧と同じ src を再利用 */
-    lbImg.alt = link.getAttribute("aria-label") || "";
-    lb.classList.add("open");
-    document.body.style.overflow = "hidden";  /* 背後のスクロールを止める */
-    lbClose.focus();
-  };
-  const closeLightbox = () => {
-    if (!lb.classList.contains("open")) return;
-    lb.classList.remove("open");
-    document.body.style.overflow = "";
-    if (lbOpener) lbOpener.focus();
-    lbOpener = null;
-  };
-
-  document.querySelectorAll(".player .img-link").forEach(link => {
-    link.addEventListener("click", (ev) => { ev.preventDefault(); openLightbox(link); });
-  });
-  lbClose.addEventListener("click", closeLightbox);
-  lb.addEventListener("click", (ev) => { if (ev.target === lb) closeLightbox(); }); /* 背景クリック */
-  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closeLightbox(); });
-
-  /* --- モーション演出(reduced-motion 環境では CSS 側ですべて無効) --- */
-  const motionOK = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
-
-  /* h1 を1文字ずつ <span> に分解(起動時に文字が沈み込みから立ち上がる) */
-  if (motionOK){
-    const h1 = $("siteName"), text = h1.textContent;
-    h1.setAttribute("aria-label", text);
-    h1.innerHTML = [...text].map((c, i) =>
-      `<span class="ch" aria-hidden="true" style="--i:${i}">${c}</span>`).join("");
+  const card = w => `<a class="work-card" href="${esc(workURL(w))}"><div class="card-media${!w.youtubeId?' still':''}">${thumbnail(w)}</div><h3>${esc(w.title)}</h3>${w.year?`<p class="work-year">${esc(w.year)}</p>`:''}</a>`;
+  const media = (w,lazy=true) => `<div class="media${!w.youtubeId?' still':''}">${thumbnail(w,lazy)}${w.youtubeId?`<button type="button" class="media-action" data-video="${esc(w.youtubeId)}" aria-label="${esc(w.title)} を再生"><span class="media-label media-play-label" aria-hidden="true"><span class="media-play-icon"><img class="media-play-icon-light" src="images/ui/play-light.svg" alt=""><img class="media-play-icon-dark" src="images/ui/play.svg" alt=""></span><span>Play</span></span></button>`:w.image?`<a class="media-action" href="${esc(url(w.image))}" data-enlarge aria-label="${esc(w.title)} を拡大表示"><span class="media-label media-view-label" aria-hidden="true"><span class="media-view-icon"><img class="media-view-icon-light" src="images/ui/view-light.svg" alt=""><img class="media-view-icon-dark" src="images/ui/view.svg" alt=""></span><span>View</span></span></a>`:''}</div>`;
+  const params=new URLSearchParams(location.search), selected=params.get('work');
+  const isList=params.get('page')==='works';
+  document.querySelectorAll('[data-page]').forEach(a=>{if(a.dataset.page===((selected!==null||isList)?'works':'home'))a.setAttribute('aria-current','page');});
+  if(selected!==null){
+    const w=WORKS.find(w=>key(w)===selected);
+    if(w){
+      document.title=`${w.title} — ${PROFILE.name}`;
+      $('main').classList.add('framed-page','detail-page');
+      const paragraphs=Array.isArray(w.overview)?w.overview:(w.overview?[w.overview]:(w.note?[w.note]:[]));
+      const gallery=(w.gallery||[]).filter(g=>typeof g==='string'||g.image||g.youtubeId);
+      $('main').innerHTML=`<article class="wrap"><header class="detail-heading"><h1>${esc(w.title)}</h1>${w.year?`<p class="work-year">${esc(w.year)}</p>`:''}</header><div class="detail-media">${media(w,false)}</div>${paragraphs.length?`<div class="overview prose">${paragraphs.map(p=>`<p>${esc(p)}</p>`).join('')}</div>`:''}${gallery.length?`<div class="gallery">${gallery.map(g=>media(typeof g==='string'?{image:g,title:w.title}:{...g,title:g.title||w.title})).join('')}</div>`:''}</article>`;
+    }else{$('main').innerHTML='<div class="wrap list-page"><h1>作品が見つかりません</h1><a href="?page=works">Worksへ戻る</a></div>';}
+  }else if(isList){
+    $('main').classList.add('framed-page');
+    document.title=`Works — ${PROFILE.name}`;
+    const categories = [...new Set([...WORK_CATEGORIES, ...WORKS.map(w => w.category || '')])];
+    const groups = categories.map((category, i) => {
+      const items = sortedWorks.filter(w => (w.category || '') === category);
+      if (!items.length) return '';
+      const label = WORK_CATEGORY_LABELS[category] || category || WORK_CATEGORY_LABELS.other;
+      return `<section class="work-category" aria-labelledby="category-${i}"><h2 id="category-${i}">${esc(label)}</h2><div class="work-grid">${items.map(card).join('')}</div></section>`;
+    }).join('');
+    $('main').innerHTML=`<section class="wrap list-page"><h1>Works</h1>${groups}</section>`;
+  }else{
+    const reel=PROFILE.showreel;
+    const hero=PROFILE.hero;
+    $('main').classList.add('home-page');
+    const heroHTML=hero ? '<section class="hero" aria-label="'+esc(hero.title)+'"><picture><source media="(max-width:760px)" srcset="'+esc(url(hero.mobile))+'" width="390" height="211"><img src="'+esc(url(hero.desktop))+'" width="1440" height="178" alt="'+esc(hero.title)+'" fetchpriority="high"></picture></section>' : '';
+    const contactLinks=(PROFILE.commission.linkLabels||[]).map(label=>PROFILE.links.find(l=>l.label===label)).filter(l=>l&&l.url).map(l=>'<a class="view-all" href="'+esc(href(l.url))+'"'+(/^https?:/i.test(href(l.url))?' target="_blank" rel="noopener"':'')+'>'+esc(l.label)+'</a>').join('');
+    $('main').innerHTML=`${heroHTML}${reel?`<section class="wrap showreel"><h1>${esc(reel.title)}</h1>${reel.youtubeId?`<div class="detail-media">${media({youtubeId:reel.youtubeId,title:reel.title},false)}</div>`:`<p class="showreel-status">${esc(reel.status)}</p>`}</section>`:''}<section class="home-works" aria-labelledby="worksHeading"><div class="wrap"><h2 id="worksHeading">Works</h2><div class="works-actions"><a class="view-all" href="?page=works">View All →</a></div></div><div class="works-carousel"><div class="scroll-controls" aria-label="作品の横スクロール"><button type="button" id="worksPrev" aria-label="前の作品" aria-controls="worksScroll"></button><button type="button" id="worksNext" aria-label="次の作品" aria-controls="worksScroll"></button></div><div id="worksScroll" class="works-scroll" tabindex="0" role="region" aria-label="作品一覧。左右にスクロールできます"><div class="works-track">${sortedWorks.map(card).join('')}</div></div></div><input class="works-scrollbar" id="worksScrollbar" type="range" min="0" max="1000" value="0" step="1" aria-label="作品一覧のスクロール位置" aria-controls="worksScroll"></section><section class="wrap about"><h2>About</h2><div class="about-identity"><img src="images/ui/logo.png" width="42" height="38" alt=""><h3>${esc(PROFILE.name)}</h3></div><div class="prose">${PROFILE.bio.map(p=>`<p>${esc(p)}</p>`).join('')}</div></section><section class="wrap commissions"><h2>Commissions</h2><p class="commission-status">${esc(PROFILE.commissionsOpen?PROFILE.commission.openLabel:PROFILE.commission.closedLabel)}</p><div class="commission-details"><ul>${PROFILE.commission.accepts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><p>${esc(PROFILE.commission.note)}</p><div class="commission-links">${contactLinks}</div></div></section>`;
   }
-
-  /* スクロールで現れる要素(クラスはJSで付与 → JSが無い環境では最初から見える) */
-  const revealTargets = [...document.querySelectorAll(
-    ".sec-head, #bio, .group-head, #workList .work, #workList .group-empty, .cols > *, footer .wrap")];
-  revealTargets.forEach(el => el.classList.add("reveal"));
-  if (motionOK && "IntersectionObserver" in window){
-    const io = new IntersectionObserver((entries) => {
-      entries.filter(e => e.isIntersecting).forEach((e, k) => {
-        e.target.style.transitionDelay = `${k * 70}ms`;  /* 同時到達分だけ時差 */
-        e.target.classList.add("in");
-        io.unobserve(e.target);
-      });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.1 });
-    revealTargets.forEach(el => io.observe(el));
-    /* キーボード移動で先に到達した要素は隠したままにしない */
-    document.addEventListener("focusin", (ev) => {
-      const r = ev.target.closest(".reveal");
-      if (r) r.classList.add("in");
-    });
-  } else {
-    revealTargets.forEach(el => el.classList.add("in"));
-  }
-
-  /* ローディング → 起動シーケンス
-     フォント読込を待って(上限1.1秒)オーバーレイを閉じ、本編の演出を始める */
-  const startBoot = () => requestAnimationFrame(() => requestAnimationFrame(() => {
-    document.body.classList.add("is-ready");
-  }));
-  if (motionOK){
-    const pre = document.createElement("div");
-    pre.className = "preloader";
-    pre.setAttribute("aria-hidden", "true");
-    pre.innerHTML = '<span class="mono">LOADING</span><span class="bar"></span>';
-    document.body.appendChild(pre);
-    const t0 = performance.now();
-    const close = () => {
-      /* バーが描き切るまでは最低限見せる(体感0.65秒) */
-      const hold = Math.max(0, 650 - (performance.now() - t0));
-      setTimeout(() => {
-        pre.style.opacity = "0";
-        startBoot();
-        setTimeout(() => pre.remove(), 400);
-      }, hold);
+  const scroller=$('worksScroll');
+  if(scroller){
+    const prev=$('worksPrev'),next=$('worksNext'),bar=$('worksScrollbar');
+    const update=()=>{
+      const max=scroller.scrollWidth-scroller.clientWidth;
+      prev.disabled=scroller.scrollLeft<=1;next.disabled=scroller.scrollLeft>=max-1;
+      bar.disabled=max<=1;bar.value=max>0?Math.round(scroller.scrollLeft/max*1000):0;
+      bar.setAttribute('aria-valuetext',Math.round(Number(bar.value)/10)+'%');
+      bar.style.setProperty('--scroll-thumb-width',Math.max(24,bar.clientWidth*scroller.clientWidth/scroller.scrollWidth)+'px');
     };
-    Promise.race([
-      document.fonts ? document.fonts.ready : Promise.resolve(),
-      new Promise(r => setTimeout(r, 1100)),
-    ]).then(close, close);
-  } else {
-    startBoot();
+    bar.addEventListener('input',()=>{scroller.scrollLeft=Number(bar.value)/1000*(scroller.scrollWidth-scroller.clientWidth);});
+    bar.addEventListener('pointerdown',()=>{scroller.style.scrollSnapType='none';});
+    const finishDrag=()=>{scroller.style.scrollSnapType='';update();};
+    bar.addEventListener('change',finishDrag);bar.addEventListener('pointercancel',finishDrag);
+    const move=direction=>{
+      const card=scroller.querySelector('.work-card');
+      if(!card) return;
+      const step=card.getBoundingClientRect().width+(parseFloat(getComputedStyle(scroller.querySelector('.works-track')).gap)||0);
+      scroller.scrollBy({left:direction*step,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
+    };
+    prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
+    scroller.addEventListener('scroll',update,{passive:true});
+    new ResizeObserver(update).observe(scroller);
+    update();
   }
+  document.querySelectorAll('img[data-youtube]').forEach(img=>{
+    const fallback=()=>{if(!img.dataset.fallback){img.dataset.fallback='1';img.src=`https://i.ytimg.com/vi/${encodeURIComponent(img.dataset.youtube)}/hqdefault.jpg`;}};
+    img.addEventListener('error',fallback);img.addEventListener('load',()=>{if(img.naturalWidth<320)fallback();});
+    if(img.complete && img.naturalWidth<320)fallback();
+  });
+  document.querySelectorAll('[data-video]').forEach(button=>button.addEventListener('click',()=>{
+    const iframe=document.createElement('iframe'); iframe.src=`https://www.youtube-nocookie.com/embed/${encodeURIComponent(button.dataset.video)}?autoplay=1`;iframe.title=button.getAttribute('aria-label');iframe.allow='autoplay; encrypted-media; picture-in-picture';iframe.allowFullscreen=true;button.parentElement.replaceChildren(iframe);iframe.focus();
+  }));
+  const menu=$('mobileMenu'),lb=$('lightbox');let opener=null;
+  const reducedMotion=window.matchMedia('(prefers-reduced-motion:reduce)');
+  let menuClosing=false, menuCloseTimer;
+  const finishMenuClose=()=>{
+    clearTimeout(menuCloseTimer);
+    menuClosing=false;
+    menu.classList.remove('is-visible');
+    if(menu.open) menu.close();
+  };
+  const closeMenu=()=>{
+    if(!menu.open || menuClosing) return;
+    menuClosing=true;
+    menu.classList.remove('is-visible');
+    // ダイアログとフォーカス制御はフェードが完了するまで保持する。
+    const duration=getComputedStyle(menu).transitionDuration.split(',').reduce((max,value)=>{
+      const n=parseFloat(value)||0;
+      return Math.max(max,value.trim().endsWith('ms')?n:n*1000);
+    },0);
+    if(reducedMotion.matches || !duration) finishMenuClose();
+    else menuCloseTimer=setTimeout(finishMenuClose,duration+50);
+  };
+  $('menuOpen').addEventListener('click',()=>{
+    if(menu.open) return;
+    clearTimeout(menuCloseTimer);
+    menuClosing=false;
+    menu.showModal();
+    document.body.style.overflow='hidden';
+    $('menuOpen').setAttribute('aria-expanded','true');
+    // 閉じた状態を計算してから切り替え、初回もトランジションを発火させる。
+    void menu.offsetWidth;
+    menu.classList.add('is-visible');
+    $('menuClose').focus();
+  });
+  $('menuClose').addEventListener('click',closeMenu);
+  menu.addEventListener('cancel',e=>{e.preventDefault();closeMenu();});
+  menu.addEventListener('transitionend',e=>{
+    if(menuClosing && e.target===menu && e.propertyName==='opacity') finishMenuClose();
+  });
+  menu.addEventListener('close',()=>{
+    clearTimeout(menuCloseTimer);
+    menuClosing=false;
+    menu.classList.remove('is-visible');
+    document.body.style.overflow='';
+    $('menuOpen').setAttribute('aria-expanded','false');
+    if(window.matchMedia('(max-width:760px)').matches) $('menuOpen').focus();
+    else document.querySelector('.desktop-nav a[aria-current="page"]').focus();
+  });
+  reducedMotion.addEventListener('change',e=>{if(e.matches && menuClosing) finishMenuClose();});
+  window.matchMedia('(max-width:760px)').addEventListener('change',e=>{if(!e.matches && menu.open) finishMenuClose();});
+  document.querySelectorAll('[data-enlarge]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();opener=a;$('lbImage').src=a.href;$('lbImage').alt=a.getAttribute('aria-label');lb.showModal();document.body.style.overflow='hidden';$('lbClose').focus();}));
+  $('lbClose').addEventListener('click',()=>lb.close());lb.addEventListener('click',e=>{if(e.target===lb)lb.close();});lb.addEventListener('close',()=>{document.body.style.overflow='';if(opener)opener.focus();});
 })();
 </script>
 </body>
