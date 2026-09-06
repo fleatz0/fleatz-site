@@ -99,7 +99,7 @@ const WORKS = [
     note: "PVSF2022Sp 出展映像",  // ← 一言(空なら非表示)
   },
   {
-    featured: true, // Homeに載せない作品は false に変更
+    featured: false, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "zCdL8Cusa1o",
     title: "リテラシー / wotaku 二次創作MV",
@@ -117,7 +117,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
     {
-    featured: true, // Homeに載せない作品は false に変更
+    featured: false, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "l7-ZicpdhvM",
     title: "Elevator",
@@ -126,7 +126,7 @@ const WORKS = [
     note: "",
   },
   {
-    featured: true, // Homeに載せない作品は false に変更
+    featured: false, // Homeに載せない作品は false に変更
     category: "ロゴデザイン",
     youtubeId: "",
     image: "images/works/PVSF_logo.png",  // images/works/ に画像を置いてパスを指定
@@ -146,7 +146,7 @@ const WORKS = [
     note: "",
   },
   {
-    featured: true, // Homeに載せない作品は false に変更
+    featured: false, // Homeに載せない作品は false に変更
     category: "3DCG",
     youtubeId: "",
     image: "images/works/ship.jpg",  // images/works/ に画像を置いてパスを指定
