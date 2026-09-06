@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fleatz</title></head>
+<body><p id="status">読み込み中…</p>
+<script>
+(async()=>{
+  const root=new URL('../',location.href);
+  try {
+    const response=await fetch(new URL('index.html',root),{cache:'no-cache'});
+    if(!response.ok) throw new Error('Page unavailable');
+    const html=await response.text();
+    history.replaceState(null,'',location.pathname.replace(/\/$/,'')+location.search+location.hash);
+    document.open();
+    document.write(html.replace('<head>','<head><base href="'+root.href+'">'));
+    document.close();
+  } catch(error) {
+    document.getElementById('status').textContent='ページを読み込めませんでした。再読み込みしてください。';
+  }
+})();
+</script></body></html>
