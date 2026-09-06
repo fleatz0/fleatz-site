@@ -57,7 +57,7 @@ const PROFILE = {
   links: [
     { label: "X", url: "https://x.com/Fleatz_" },
     { label: "YouTube", url: "https://www.youtube.com/@Fleatz" },      // ← 再開したら記入
-    { label: "Mail", url: "fleatz123@gmail.com" },             // ← 例: "mailto:xxx@example.com"
+    { label: "Mail", url: "mailto:fleatz123@gmail.com" },             // ← 例: "mailto:xxx@example.com"
   ],
   // 依頼について(COMMISSIONに表示)
   commission: {
