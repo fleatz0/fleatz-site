@@ -48,6 +48,10 @@ const PROFILE = {
     "3DCGとモーショングラフィックスを組み合わせた映像や、ロゴ・シェイプモーション、MV、リリックモーションなどを制作しています。",
     "AfterEffects, Blenderを主に使用しています。",
   ],
+  bioEn: [
+    "I create visual works combining 3DCG and motion graphics, including logo and shape animations, music videos, and lyric videos.",
+    "I mainly work with AfterEffects and Blender.",
+  ],
   // 連絡先・リンク(不要な行は消してよい)
   links: [
     { label: "X", url: "https://x.com/Fleatz_" },
@@ -56,6 +60,12 @@ const PROFILE = {
   ],
   // 依頼について(COMMISSIONに表示)
   commission: {
+    acceptsEn: [
+      "Music Videos / Promotional Videos / Lyric Videos",
+      "Logo Animation / Opening Sequences",
+      "Loops / Jingles",
+    ],
+    noteEn: "For commissions and inquiries, please contact with me via X or mail at Fleatz123@gmail.com.",
     linkLabels: ["Mail", "X"], // PROFILE.linksの連絡先を参照
     openLabel: "現在依頼受付中 / Commissions Open",
     closedLabel: "現在依頼受付停止中 / Commissions Closed",

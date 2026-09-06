@@ -87,3 +87,5 @@ Custom domain に入力し、ドメイン側でCNAMEを設定すればよい。
 - HeroのSVGはFigmaの文字形状を保持し、共用の縦線を削除済みです。PC版の上下端に近い横線もセクション境界に一本化しています。再書き出し時は重複線に注意してください。
 
 - Worksの帯は `--carousel-bg`、上下の余白は `--carousel-padding`、カード内の文字余白は `--carousel-caption-padding` で調整できます。下部のスクロールバーはドラッグ・キーボード操作に対応し、太さは `--scrollbar-height` です。
+
+- Aboutの英訳は `PROFILE.bioEn`、Commissionsの英訳は `PROFILE.commission.acceptsEn` と `noteEn` で編集できます。日英の区切り線は `--translation-rule-width`、余白は `--translation-gap` で調整できます。
