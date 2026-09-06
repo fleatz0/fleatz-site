@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fleatz</title></head>
-<body><p id="status">読み込み中…</p>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fleatz</title><style>html,body{background:#080808;color:#f2f2f2}body{font-family:sans-serif}#status{margin:24px}</style></head>
+<body><p id="status" role="alert" hidden></p>
 <script>
 (async()=>{
   const root=new URL('../',location.href);
@@ -13,6 +13,7 @@
     document.write(html.replace('<head>','<head><base href="'+root.href+'">'));
     document.close();
   } catch(error) {
+    document.getElementById('status').hidden=false;
     document.getElementById('status').textContent='ページを読み込めませんでした。再読み込みしてください。';
   }
 })();
