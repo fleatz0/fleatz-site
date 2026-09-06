@@ -89,3 +89,7 @@ Custom domain に入力し、ドメイン側でCNAMEを設定すればよい。
 - Worksの帯は `--carousel-bg`、上下の余白は `--carousel-padding`、カード内の文字余白は `--carousel-caption-padding` で調整できます。下部のスクロールバーはドラッグ・キーボード操作に対応し、太さは `--scrollbar-height` です。
 
 - Aboutの英訳は `PROFILE.bioEn`、Commissionsの英訳は `PROFILE.commission.acceptsEn` と `noteEn` で編集できます。日英の区切り線は `--translation-rule-width`、余白は `--translation-gap` で調整できます。
+
+### Homeに掲載する作品を選ぶ
+
+works.jsの各作品の `featured` を `true` にするとHomeに掲載、`false` にするとHomeから非表示になります。Works一覧と詳細ページには引き続き掲載されます。Home内の並び順は新しい年順、同じ年は記入順です。

@@ -11,6 +11,7 @@
      画像ファイルは images/works/ に置き、"images/works/ファイル名.png" のように指定
      youtubeId と image を両方空にすると「準備中」表示になる
      (youtubeId が入っていれば image より動画を優先して表示)
+   ・featured: true ならHomeに掲載、falseならWorks一覧のみに掲載
    ・id: 任意のURL識別子(例 "h2o")。一度設定したら変更しない
    ・overview: 詳細説明の段落配列。省略すると note を表示
    ・gallery: 追加画像パスの配列。省略/空配列なら欄ごと非表示
@@ -80,6 +81,7 @@ const PROFILE = {
 
 const WORKS = [
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "WMJsnOeGG1o",
     title: "BREAK IT DOWN — Fleatz part",
@@ -88,6 +90,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "1YRfjEukN0s",
     title: "シックス・フィート・アンダー / Aqu3ra 二次創作MV",
@@ -96,6 +99,7 @@ const WORKS = [
     note: "PVSF2022Sp 出展映像",  // ← 一言(空なら非表示)
   },
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "zCdL8Cusa1o",
     title: "リテラシー / wotaku 二次創作MV",
@@ -104,6 +108,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "J31PCcMarDs",
     title: "Crystallized",
@@ -112,6 +117,7 @@ const WORKS = [
     note: "",  // ← 一言(空なら非表示)
   },
     {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "l7-ZicpdhvM",
     title: "Elevator",
@@ -120,6 +126,7 @@ const WORKS = [
     note: "",
   },
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "ロゴデザイン",
     youtubeId: "",
     image: "images/works/PVSF_logo.png",  // images/works/ に画像を置いてパスを指定
@@ -129,6 +136,7 @@ const WORKS = [
     note: "映像上映イベントPVSFのロゴを作成しました。",
   },
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "3DCG",
     youtubeId: "",
     image: "images/works/volume2.jpg",  // images/works/ に画像を置いてパスを指定
@@ -138,6 +146,7 @@ const WORKS = [
     note: "",
   },
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "3DCG",
     youtubeId: "",
     image: "images/works/ship.jpg",  // images/works/ に画像を置いてパスを指定
@@ -147,6 +156,7 @@ const WORKS = [
     note: "",
   },
    {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "BZy4A7YD7J4",
     title: "Heart of Android",
@@ -156,6 +166,7 @@ const WORKS = [
   },
   /* --- 動画作品を追加する時はこのブロックをコピーして使う ---
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "映像制作",
     youtubeId: "",
     title: "",
@@ -167,6 +178,7 @@ const WORKS = [
 
   /* --- ロゴ・3DCGスチルなど、静止画の作品を追加する時はこちらをコピー ---
   {
+    featured: true, // Homeに載せない作品は false に変更
     category: "ロゴデザイン",  // または "3DCG"
     youtubeId: "",
     image: "images/works/ファイル名.png",  // images/works/ に画像を置いてパスを指定

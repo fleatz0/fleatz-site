@@ -83,7 +83,7 @@ h3 { font-weight:500; } p { overflow-wrap:anywhere; }
 a[aria-current=page] { color:var(--paper); }
 .menu-toggle { position:relative; display:none; width:44px; height:44px; border:0; background:transparent; align-items:center; justify-content:center; }
 .menu-toggle img,.menu-toggle svg { width:23px; height:20px; object-fit:contain; }
-.menu-toggle[aria-expanded="true"] svg { visibility:hidden; }
+.menu-toggle[aria-expanded="true"]:not(.is-closing) svg { visibility:hidden; }
 .showreel { padding-top:64px; padding-bottom:64px; }
 /* 境界線は各セクションの下側だけ。縦線はページ全体で一度だけ描く。 */
 .home-page,.framed-page { position:relative; isolation:isolate; }
@@ -291,7 +291,7 @@ dialog::backdrop { background:rgba(8,8,8,.96); }
     $('main').classList.add('home-page');
     const heroHTML=hero ? '<section class="hero" aria-label="'+esc(hero.title)+'"><picture><source media="(max-width:760px)" srcset="'+esc(url(hero.mobile))+'" width="390" height="211"><img src="'+esc(url(hero.desktop))+'" width="1440" height="178" alt="'+esc(hero.title)+'" fetchpriority="high"></picture></section>' : '';
     const contactLinks=(PROFILE.commission.linkLabels||[]).map(label=>PROFILE.links.find(l=>l.label===label)).filter(l=>l&&l.url).map(l=>'<a class="view-all" href="'+esc(href(l.url))+'"'+(/^https?:/i.test(href(l.url))?' target="_blank" rel="noopener"':'')+'>'+esc(l.label)+'</a>').join('');
-    $('main').innerHTML=`${heroHTML}${reel?`<section class="wrap showreel"><h1>${esc(reel.title)}</h1>${reel.youtubeId?`<div class="detail-media">${media({youtubeId:reel.youtubeId,title:reel.title},false)}</div>`:`<p class="showreel-status">${esc(reel.status)}</p>`}</section>`:''}<section class="home-works" aria-labelledby="worksHeading"><div class="wrap"><h2 id="worksHeading">Works</h2><div class="works-actions"><a class="view-all" href="?page=works">View All →</a></div></div><div class="works-carousel"><div class="scroll-controls" aria-label="作品の横スクロール"><button type="button" id="worksPrev" aria-label="前の作品" aria-controls="worksScroll"></button><button type="button" id="worksNext" aria-label="次の作品" aria-controls="worksScroll"></button></div><div id="worksScroll" class="works-scroll" tabindex="0" role="region" aria-label="作品一覧。左右にスクロールできます"><div class="works-track">${sortedWorks.map(card).join('')}</div></div></div><input class="works-scrollbar" id="worksScrollbar" type="range" min="0" max="1000" value="0" step="1" aria-label="作品一覧のスクロール位置" aria-controls="worksScroll"></section><section class="wrap about"><h2>About</h2><div class="about-identity"><img src="images/ui/logo.png" width="42" height="38" alt=""><h3>${esc(PROFILE.name)}</h3></div><div class="prose">${PROFILE.bio.map(p=>`<p>${esc(p)}</p>`).join('')}</div>${PROFILE.bioEn?.length?`<div class="prose translation" lang="en">${PROFILE.bioEn.map(p=>`<p>${esc(p)}</p>`).join('')}</div>`:''}</section><section class="wrap commissions"><h2>Commissions</h2><p class="commission-status">${esc(PROFILE.commissionsOpen?PROFILE.commission.openLabel:PROFILE.commission.closedLabel)}</p><div class="commission-details"><ul>${PROFILE.commission.accepts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><p>${esc(PROFILE.commission.note)}</p>${PROFILE.commission.acceptsEn?.length||PROFILE.commission.noteEn?`<div class="translation" lang="en"><ul>${(PROFILE.commission.acceptsEn||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>${PROFILE.commission.noteEn?`<p>${esc(PROFILE.commission.noteEn)}</p>`:''}</div>`:''}<div class="commission-links">${contactLinks}</div></div></section>`;
+    $('main').innerHTML=`${heroHTML}${reel?`<section class="wrap showreel"><h1>${esc(reel.title)}</h1>${reel.youtubeId?`<div class="detail-media">${media({youtubeId:reel.youtubeId,title:reel.title},false)}</div>`:`<p class="showreel-status">${esc(reel.status)}</p>`}</section>`:''}<section class="home-works" aria-labelledby="worksHeading"><div class="wrap"><h2 id="worksHeading">Works</h2><div class="works-actions"><a class="view-all" href="?page=works">View All →</a></div></div><div class="works-carousel"><div class="scroll-controls" aria-label="作品の横スクロール"><button type="button" id="worksPrev" aria-label="前の作品" aria-controls="worksScroll"></button><button type="button" id="worksNext" aria-label="次の作品" aria-controls="worksScroll"></button></div><div id="worksScroll" class="works-scroll" tabindex="0" role="region" aria-label="作品一覧。左右にスクロールできます"><div class="works-track">${sortedWorks.filter(w=>w.featured===true).map(card).join('')}</div></div></div><input class="works-scrollbar" id="worksScrollbar" type="range" min="0" max="1000" value="0" step="1" aria-label="作品一覧のスクロール位置" aria-controls="worksScroll"></section><section class="wrap about"><h2>About</h2><div class="about-identity"><img src="images/ui/logo.png" width="42" height="38" alt=""><h3>${esc(PROFILE.name)}</h3></div><div class="prose">${PROFILE.bio.map(p=>`<p>${esc(p)}</p>`).join('')}</div>${PROFILE.bioEn?.length?`<div class="prose translation" lang="en">${PROFILE.bioEn.map(p=>`<p>${esc(p)}</p>`).join('')}</div>`:''}</section><section class="wrap commissions"><h2>Commissions</h2><p class="commission-status">${esc(PROFILE.commissionsOpen?PROFILE.commission.openLabel:PROFILE.commission.closedLabel)}</p><div class="commission-details"><ul>${PROFILE.commission.accepts.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><p>${esc(PROFILE.commission.note)}</p>${PROFILE.commission.acceptsEn?.length||PROFILE.commission.noteEn?`<div class="translation" lang="en"><ul>${(PROFILE.commission.acceptsEn||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>${PROFILE.commission.noteEn?`<p>${esc(PROFILE.commission.noteEn)}</p>`:''}</div>`:''}<div class="commission-links">${contactLinks}</div></div></section>`;
   }
   const scroller=$('worksScroll');
   if(scroller){
@@ -338,6 +338,7 @@ dialog::backdrop { background:rgba(8,8,8,.96); }
   const closeMenu=()=>{
     if(!menu.open || menuClosing) return;
     menuClosing=true;
+    $('menuOpen').classList.add('is-closing');
     menu.classList.remove('is-visible');
     // ダイアログとフォーカス制御はフェードが完了するまで保持する。
     const duration=getComputedStyle(menu).transitionDuration.split(',').reduce((max,value)=>{
@@ -351,6 +352,7 @@ dialog::backdrop { background:rgba(8,8,8,.96); }
     if(menu.open) return;
     clearTimeout(menuCloseTimer);
     menuClosing=false;
+    $('menuOpen').classList.remove('is-closing');
     menu.showModal();
     document.body.style.overflow='hidden';
     $('menuOpen').setAttribute('aria-expanded','true');
@@ -370,6 +372,7 @@ dialog::backdrop { background:rgba(8,8,8,.96); }
     menu.classList.remove('is-visible');
     document.body.style.overflow='';
     $('menuOpen').setAttribute('aria-expanded','false');
+    $('menuOpen').classList.remove('is-closing');
     if(window.matchMedia('(max-width:760px)').matches) $('menuOpen').focus();
     else document.querySelector('.desktop-nav a[aria-current="page"]').focus();
   });
